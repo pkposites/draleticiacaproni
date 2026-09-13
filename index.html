@@ -170,11 +170,77 @@
   </div>
 </section>
 
+<!-- ===================== QUIZ INTERATIVO ===================== -->
+<section class="quiz" id="quiz">
+  <div class="container quiz-inner">
+    <div class="section-heading center">
+      <p class="eyebrow">Avaliação Inicial</p>
+      <h2>Conte um pouco sobre o seu caso</h2>
+      <p class="qualify-sub">
+        Leva menos de 1 minuto. Assim a equipe já recebe seu contato
+        entendendo sua queixa e pode te direcionar melhor.
+      </p>
+    </div>
+
+    <div class="quiz-box">
+      <div class="quiz-progress">
+        <span class="quiz-dot active" data-dot="1"></span>
+        <span class="quiz-dot" data-dot="2"></span>
+        <span class="quiz-dot" data-dot="3"></span>
+        <span class="quiz-dot" data-dot="4"></span>
+      </div>
+
+      <div class="quiz-step" data-step="1">
+        <label>Qual sua principal queixa hoje?</label>
+        <div class="quiz-options">
+          <button type="button" class="quiz-option" data-field="queixa" data-value="Recuo / entrelinha frontal">Recuo ou entrelinha frontal</button>
+          <button type="button" class="quiz-option" data-field="queixa" data-value="Rarefação no topo da cabeça">Rarefação no topo da cabeça</button>
+          <button type="button" class="quiz-option" data-field="queixa" data-value="Sobrancelhas ralas">Sobrancelhas ralas</button>
+          <button type="button" class="quiz-option" data-field="queixa" data-value="Ainda não sei dizer">Ainda não sei dizer ao certo</button>
+        </div>
+      </div>
+
+      <div class="quiz-step" data-step="2" hidden>
+        <label>Você já fez transplante capilar antes?</label>
+        <div class="quiz-options">
+          <button type="button" class="quiz-option" data-field="ja_fez_transplante" data-value="Não, nunca fiz">Não, nunca fiz</button>
+          <button type="button" class="quiz-option" data-field="ja_fez_transplante" data-value="Sim, já fiz um">Sim, já fiz um</button>
+          <button type="button" class="quiz-option" data-field="ja_fez_transplante" data-value="Sim, já fiz mais de um">Sim, já fiz mais de um</button>
+        </div>
+      </div>
+
+      <div class="quiz-step" data-step="3" hidden>
+        <label>Há quanto tempo você percebe esse quadro?</label>
+        <div class="quiz-options">
+          <button type="button" class="quiz-option" data-field="tempo_queixa" data-value="Menos de 1 ano">Menos de 1 ano</button>
+          <button type="button" class="quiz-option" data-field="tempo_queixa" data-value="1 a 3 anos">1 a 3 anos</button>
+          <button type="button" class="quiz-option" data-field="tempo_queixa" data-value="Mais de 3 anos">Mais de 3 anos</button>
+        </div>
+      </div>
+
+      <div class="quiz-step" data-step="4" hidden>
+        <label>Quando você pretende iniciar o tratamento?</label>
+        <div class="quiz-options">
+          <button type="button" class="quiz-option" data-field="urgencia" data-value="O quanto antes">O quanto antes</button>
+          <button type="button" class="quiz-option" data-field="urgencia" data-value="Nos próximos meses">Nos próximos meses</button>
+          <button type="button" class="quiz-option" data-field="urgencia" data-value="Só pesquisando por enquanto">Só pesquisando por enquanto</button>
+        </div>
+      </div>
+
+      <div class="quiz-result" id="quiz-result" hidden>
+        <p class="quiz-result-title">Perfil registrado com sucesso.</p>
+        <p class="quiz-result-summary" id="quiz-result-summary"></p>
+        <button type="button" class="quiz-restart" id="quiz-restart">Refazer respostas</button>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- ===================== QUALIFICAÇÃO ===================== -->
 <section class="qualify" id="qualificacao">
   <div class="container qualify-inner">
     <div class="section-heading center">
-      <p class="eyebrow">Avaliação Inicial</p>
+      <p class="eyebrow">Última etapa</p>
       <h2>Pronta para dar o próximo passo?</h2>
       <p class="qualify-sub">
         Você conheceu o método da Dra. Letícia Caproni: avaliação individual,
@@ -207,7 +273,7 @@
   <div class="container final-cta-inner">
     <h2>Dê o primeiro passo com quem entende do assunto</h2>
     <p>Fale agora com a equipe da Dra. Letícia Caproni e agende sua avaliação inicial.</p>
-    <a href="#" id="whatsapp-direct" class="btn btn-primary btn-lg">Falar no WhatsApp agora</a>
+    <a href="#qualificacao" id="cta-final-scroll" class="btn btn-primary btn-lg">Quero Agendar Minha Avaliação</a>
   </div>
 </section>
 
@@ -221,7 +287,7 @@
 
 <!-- Barra fixa de WhatsApp (somente mobile, via CSS) -->
 <div class="mobile-sticky-cta">
-  <a href="#" id="whatsapp-sticky" class="btn btn-primary">Falar no WhatsApp</a>
+  <a href="#qualificacao" id="cta-sticky-scroll" class="btn btn-primary">Agendar Avaliação</a>
 </div>
 
 <script src="script.js"></script>

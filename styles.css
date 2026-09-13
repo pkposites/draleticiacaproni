@@ -196,6 +196,52 @@ p{line-height:1.7;color:var(--text-muted);margin:0 0 16px;}
 .proof-card p{color:#e6e2d6;font-family:var(--serif);font-size:18px;font-style:italic;margin-bottom:16px;}
 .proof-card cite{font-size:12px;letter-spacing:1px;text-transform:uppercase;color:var(--gold-light);font-style:normal;}
 
+/* Quiz interativo */
+.quiz{padding:96px 0;background:var(--cream-dim);}
+.quiz-inner{max-width:640px;margin:0 auto;}
+.quiz-box{
+  margin-top:24px;
+  padding:40px;
+  background:#fff;
+  border:1px solid rgba(0,0,0,.1);
+  min-height:280px;
+}
+.quiz-progress{display:flex;justify-content:center;gap:8px;margin-bottom:32px;}
+.quiz-dot{width:8px;height:8px;border-radius:50%;background:rgba(0,0,0,.15);transition:background .2s ease;}
+.quiz-dot.active{background:var(--gold);}
+.quiz-step label{
+  display:block;font-family:var(--serif);font-size:21px;margin-bottom:22px;color:var(--text-dark);text-align:center;
+}
+.quiz-options{display:grid;gap:12px;}
+.quiz-option{
+  text-align:left;
+  padding:16px 20px;
+  border:1px solid rgba(0,0,0,.15);
+  background:#fff;
+  font-family:var(--sans);
+  font-size:15px;
+  cursor:pointer;
+  transition:all .2s ease;
+}
+.quiz-option:hover{border-color:var(--gold);}
+.quiz-option.selected{
+  border-color:var(--gold);
+  background:var(--green-900);
+  color:var(--cream-dim);
+}
+.quiz-result{text-align:center;padding:12px 0;}
+.quiz-result-title{
+  font-family:var(--serif);font-size:22px;color:var(--text-dark);margin-bottom:10px;
+}
+.quiz-result-summary{
+  font-size:14px;color:var(--text-muted);margin-bottom:20px;
+  padding:16px 18px;background:var(--cream-dim);border-left:2px solid var(--gold);text-align:left;
+}
+.quiz-restart{
+  background:none;border:none;color:var(--text-muted);
+  text-decoration:underline;font-size:13px;cursor:pointer;font-family:var(--sans);
+}
+
 /* Qualify */
 .qualify{padding:100px 0;background:var(--cream);}
 .qualify-inner{max-width:640px;margin:0 auto;}
@@ -322,6 +368,11 @@ p{line-height:1.7;color:var(--text-muted);margin:0 0 16px;}
   .qualify-inner{max-width:100%;}
   .confirm-box{padding:24px 20px;}
   .confirm-text{font-size:14px;}
+
+  .quiz-inner{max-width:100%;}
+  .quiz-box{padding:24px 18px;min-height:auto;}
+  .quiz-step label{font-size:18px;}
+  .quiz-option{padding:16px 16px;font-size:15px;}
 
   .final-cta-inner .btn-lg{width:100%;}
 
