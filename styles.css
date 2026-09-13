@@ -179,6 +179,43 @@ p{line-height:1.7;color:var(--text-muted);margin:0 0 16px;}
 .method-card h3{font-size:20px;margin-bottom:10px;}
 .method-card p{margin:0;font-size:14px;}
 
+/* Cases antes e depois */
+.cases{padding:96px 0;background:var(--cream);}
+.cases-slider{position:relative;max-width:640px;margin:0 auto;overflow:hidden;}
+.cases-track{
+  display:flex;
+  transition:transform .4s ease;
+}
+.case-slide{
+  flex:0 0 100%;
+  margin:0;
+}
+.case-slide img{
+  width:100%;
+  border:1px solid rgba(0,0,0,.08);
+}
+.cases-arrow{
+  position:absolute;
+  top:50%;
+  transform:translateY(-50%);
+  width:40px;height:40px;
+  border-radius:50%;
+  border:1px solid var(--gold);
+  background:rgba(255,255,255,.9);
+  color:var(--green-900);
+  font-size:20px;
+  line-height:1;
+  cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:all .2s ease;
+}
+.cases-arrow:hover{background:var(--gold);}
+.cases-arrow-prev{left:-8px;}
+.cases-arrow-next{right:-8px;}
+.cases-dots{display:flex;justify-content:center;gap:8px;margin-top:24px;}
+.cases-dot{width:8px;height:8px;border-radius:50%;background:rgba(0,0,0,.15);cursor:pointer;transition:background .2s ease;}
+.cases-dot.active{background:var(--gold);}
+
 /* Proof */
 .proof{
   padding:96px 0;
@@ -373,6 +410,11 @@ p{line-height:1.7;color:var(--text-muted);margin:0 0 16px;}
   .quiz-box{padding:24px 18px;min-height:auto;}
   .quiz-step label{font-size:18px;}
   .quiz-option{padding:16px 16px;font-size:15px;}
+
+  .cases{padding:56px 0;}
+  .cases-arrow{width:34px;height:34px;font-size:17px;}
+  .cases-arrow-prev{left:2px;}
+  .cases-arrow-next{right:2px;}
 
   .final-cta-inner .btn-lg{width:100%;}
 

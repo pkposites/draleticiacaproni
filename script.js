@@ -44,6 +44,35 @@ function buildWhatsappUrl() {
 }
 
 /* ============================================================
+   SLIDER DE CASES ANTES/DEPOIS
+============================================================= */
+var casesTrack = document.getElementById('cases-track');
+if (casesTrack) {
+  var caseSlides = casesTrack.querySelectorAll('.case-slide');
+  var caseDots = document.querySelectorAll('.cases-dot');
+  var currentCase = 0;
+
+  function goToCase(n) {
+    currentCase = (n + caseSlides.length) % caseSlides.length;
+    casesTrack.style.transform = 'translateX(-' + (currentCase * 100) + '%)';
+    caseDots.forEach(function (dot, i) {
+      dot.classList.toggle('active', i === currentCase);
+    });
+    trackEvent('case_view', { indice: currentCase + 1 });
+  }
+
+  document.getElementById('cases-prev').addEventListener('click', function () {
+    goToCase(currentCase - 1);
+  });
+  document.getElementById('cases-next').addEventListener('click', function () {
+    goToCase(currentCase + 1);
+  });
+  caseDots.forEach(function (dot, i) {
+    dot.addEventListener('click', function () { goToCase(i); });
+  });
+}
+
+/* ============================================================
    QUIZ INTERATIVO
    Coleta o perfil do caso (queixa, histórico, tempo, urgência) para
    a equipe já receber o contato com contexto. As respostas entram
