@@ -6,6 +6,75 @@ document.getElementById('year').textContent = new Date().getFullYear();
 var WHATSAPP_NUMBER = "5511984954018";
 
 /* ============================================================
+   CAPTURA DE ORIGEM DO LEAD (UTM + parâmetros dinâmicos do Meta Ads)
+   Captura na URL no carregamento da página e persiste em
+   sessionStorage, para não perder a origem se o usuário navegar
+   pela página antes de preencher/enviar o formulário.
+============================================================= */
+var ORIGEM_PARAMS = [
+  'utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term',
+  'campaign_name', 'campaign_id', 'adset_name', 'adset_id', 'ad_name', 'ad_id',
+  'fbclid', 'gclid'
+];
+var ORIGEM_STORAGE_KEY = 'lead_origem_params';
+
+function captureOrigemParams() {
+  var urlParams = new URLSearchParams(window.location.search);
+  var found = {};
+
+  ORIGEM_PARAMS.forEach(function (key) {
+    var value = urlParams.get(key);
+    if (value) found[key] = value;
+  });
+
+  if (Object.keys(found).length > 0) {
+    try {
+      var existing = JSON.parse(sessionStorage.getItem(ORIGEM_STORAGE_KEY) || '{}');
+      sessionStorage.setItem(ORIGEM_STORAGE_KEY, JSON.stringify(Object.assign(existing, found)));
+    } catch (e) { /* sessionStorage indisponível: segue só com o objeto em memória */ }
+  }
+
+  return found;
+}
+
+function getOrigemParams() {
+  var fromUrl = captureOrigemParams();
+  var stored = {};
+  try {
+    stored = JSON.parse(sessionStorage.getItem(ORIGEM_STORAGE_KEY) || '{}');
+  } catch (e) { /* sessionStorage indisponível */ }
+
+  return Object.assign({}, stored, fromUrl);
+}
+
+function buildOrigemMessageBlock(origem) {
+  var canalSource = origem.utm_source;
+  var canalMedium = origem.utm_medium;
+  var canal = canalSource && canalMedium ? (canalSource + ' / ' + canalMedium)
+    : (canalSource || canalMedium || '');
+  var campanha = origem.campaign_name || origem.utm_campaign || '';
+  var adset = origem.adset_name || '';
+  var anuncio = origem.ad_name || origem.utm_content || '';
+  var termo = origem.utm_term || '';
+
+  var linhas = [];
+  if (canal) linhas.push('Canal: ' + canal);
+  if (campanha) linhas.push('Campanha: ' + campanha);
+  if (adset) linhas.push('Conjunto de anúncios: ' + adset);
+  if (anuncio) linhas.push('Anúncio: ' + anuncio);
+  if (termo) linhas.push('Termo/Público: ' + termo);
+  if (origem.fbclid) linhas.push('Origem: Meta Ads (Facebook/Instagram)');
+  if (origem.gclid) linhas.push('Origem: Google Ads');
+
+  if (linhas.length === 0) return '';
+
+  return '\n\nOrigem do lead:\n' + linhas.join('\n');
+}
+
+/* Captura assim que o script carrega, para não perder o clique inicial */
+captureOrigemParams();
+
+/* ============================================================
    TRACKING HELPERS
    - lead_qualificado: usuário leu a LP e confirmou interesse na caixinha
      (libera o botão de WhatsApp)
@@ -39,6 +108,8 @@ function buildWhatsappUrl() {
     if (quizAnswers.tempo_queixa) msg += "\n- Tempo do quadro: " + quizAnswers.tempo_queixa;
     if (quizAnswers.urgencia) msg += "\n- Quando pretende iniciar: " + quizAnswers.urgencia;
   }
+
+  msg += buildOrigemMessageBlock(getOrigemParams());
 
   return "https://wa.me/" + WHATSAPP_NUMBER + "?text=" + encodeURIComponent(msg);
 }
@@ -163,7 +234,15 @@ confirmCheckbox.addEventListener('change', function () {
     confirmHint.classList.add('hidden');
 
     if (!hasFiredLeadQualificado) {
-      trackEvent('lead_qualificado', { origem: 'caixa_confirmacao_lp' });
+      var origem = getOrigemParams();
+      trackEvent('lead_qualificado', Object.assign(
+        { origem: 'caixa_confirmacao_lp' },
+        origem,
+        {
+          campaign_name: origem.campaign_name || origem.utm_campaign || '',
+          ad_name: origem.ad_name || origem.utm_content || ''
+        }
+      ));
       hasFiredLeadQualificado = true;
     }
   } else {
@@ -176,7 +255,7 @@ confirmCheckbox.addEventListener('change', function () {
 whatsappQualificado.addEventListener('click', function (e) {
   e.preventDefault();
   if (!confirmCheckbox.checked) return;
-  trackEvent('lead_contato', { origem: 'botao_qualificado' });
+  trackEvent('lead_contato', Object.assign({ origem: 'botao_qualificado' }, getOrigemParams()));
   window.open(buildWhatsappUrl(), '_blank');
 });
 
