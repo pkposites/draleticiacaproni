@@ -252,6 +252,26 @@ p{line-height:1.7;color:var(--text-muted);margin:0 0 16px;}
   color:var(--cream);
   position:relative;
 }
+.google-rating{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  flex-wrap:wrap;
+  width:fit-content;
+  margin:0 auto 40px;
+  padding:12px 22px;
+  background:rgba(255,255,255,.04);
+  border:1px solid rgba(201,169,106,.3);
+  border-radius:999px;
+  text-decoration:none;
+  transition:all .2s ease;
+}
+.google-rating:hover{background:rgba(201,169,106,.1);}
+.google-rating-score{font-family:var(--serif);font-size:20px;font-weight:600;color:var(--cream);}
+.google-rating-stars{color:var(--gold);letter-spacing:2px;font-size:14px;}
+.google-rating-text{font-size:12px;letter-spacing:.4px;color:#cfd6cf;}
+
 .proof-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:28px;}
 .proof-card{
   margin:0;
@@ -435,6 +455,8 @@ p{line-height:1.7;color:var(--text-muted);margin:0 0 16px;}
 
   .method-card{padding:24px 20px;}
 
+  .google-rating{padding:10px 16px;margin-bottom:28px;}
+  .google-rating-text{width:100%;text-align:center;}
   .proof-grid{gap:16px;}
   .proof-card{padding:22px;}
   .proof-card p{font-size:16px;}
