@@ -259,5 +259,64 @@ p{line-height:1.7;color:var(--text-muted);margin:0 0 16px;}
 }
 @media(max-width:480px){
   .method-grid{grid-template-columns:1fr;}
-  .header-inner{flex-direction:column;gap:10px;text-align:center;}
+  .header-inner{flex-direction:row;gap:10px;}
+  .brand-name{font-size:16px;}
+  .brand-sub{font-size:9px;}
+  .header-cta{padding:9px 16px;font-size:11px;}
+}
+
+/* ============================================================
+   MOBILE-FIRST TUNING
+   Mobile é o canal principal de tráfego (anúncios), então aqui
+   reduzimos respiro/whitespace excessivo, aumentamos área de toque
+   e evitamos zoom automático do iOS em inputs.
+============================================================= */
+@media(max-width:600px){
+  .container{padding:0 18px;}
+
+  .hero-inner{padding:32px 18px 56px;gap:32px;}
+  .hero-media{max-width:220px;}
+  .hero-copy h1{font-size:28px;}
+  .hero-lead{font-size:15px;}
+  .hero-actions{flex-direction:column;gap:12px;}
+  .hero-actions .btn{width:100%;}
+  .hero-trust{justify-content:center;text-align:center;font-size:11px;}
+
+  .about, .method, .proof, .qualify, .final-cta{padding:56px 0;}
+  .section-heading{margin-bottom:32px;}
+  .section-heading h2{font-size:24px;}
+
+  .method-card{padding:24px 20px;}
+
+  .proof-grid{gap:16px;}
+  .proof-card{padding:22px;}
+  .proof-card p{font-size:16px;}
+
+  .qualify-inner{max-width:100%;}
+  .form-step label{font-size:18px;}
+  .option-btn{padding:18px 18px;font-size:16px;}
+  .form-step input{font-size:16px;padding:16px;}
+
+  .final-cta-inner .btn-lg{width:100%;}
+
+  .footer-inner{flex-direction:column;text-align:center;}
+}
+
+/* Barra fixa de WhatsApp no mobile: acesso rápido em qualquer scroll */
+.mobile-sticky-cta{
+  display:none;
+}
+@media(max-width:600px){
+  .mobile-sticky-cta{
+    display:flex;
+    position:fixed;
+    bottom:0;left:0;right:0;
+    z-index:60;
+    padding:12px 16px;
+    background:var(--green-900);
+    border-top:1px solid rgba(201,169,106,.35);
+  }
+  .mobile-sticky-cta .btn{width:100%;padding:14px;font-size:13px;}
+  /* espaço extra no fim da página para a barra fixa não cobrir o footer */
+  .site-footer{padding-bottom:88px;}
 }

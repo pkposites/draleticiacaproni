@@ -105,3 +105,12 @@ document.getElementById('whatsapp-direct').addEventListener('click', function (e
   trackEvent('lead_contato', { origem: 'cta_final' });
   window.open(buildWhatsappUrl(false), '_blank');
 });
+
+var stickyBtn = document.getElementById('whatsapp-sticky');
+if (stickyBtn) {
+  stickyBtn.addEventListener('click', function (e) {
+    e.preventDefault();
+    trackEvent('lead_contato', { origem: 'barra_fixa_mobile' });
+    window.open(buildWhatsappUrl(false), '_blank');
+  });
+}
