@@ -14,8 +14,25 @@ var WHATSAPP_NUMBER = "5511984954018";
 var ORIGEM_PARAMS = [
   'utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term',
   'campaign_name', 'campaign_id', 'adset_name', 'adset_id', 'ad_name', 'ad_id',
-  'fbclid', 'gclid'
+  'site_source_name', 'fbclid', 'gclid'
 ];
+
+/* Resolve a fonte real (Instagram/Facebook) a partir do macro do Meta Ads
+   {{site_source_name}}, que retorna "fb" ou "ig" — mais confiável que
+   depender só de utm_source, que costuma vir fixo como "facebook". */
+function resolveFonte(origem) {
+  var siteSource = (origem.site_source_name || '').toLowerCase();
+  if (siteSource === 'ig') return 'Instagram';
+  if (siteSource === 'fb') return 'Facebook';
+  if (origem.fbclid) return 'Facebook/Instagram (Meta Ads)';
+  if (origem.gclid) return 'Google Ads';
+
+  var source = (origem.utm_source || '').toLowerCase();
+  if (source.indexOf('instagram') !== -1 || source === 'ig') return 'Instagram';
+  if (source.indexOf('facebook') !== -1 || source === 'fb') return 'Facebook';
+  if (source === 'google') return 'Google Ads';
+  return origem.utm_source || '';
+}
 var ORIGEM_STORAGE_KEY = 'lead_origem_params';
 
 function captureOrigemParams() {
@@ -48,23 +65,18 @@ function getOrigemParams() {
 }
 
 function buildOrigemMessageBlock(origem) {
-  var canalSource = origem.utm_source;
-  var canalMedium = origem.utm_medium;
-  var canal = canalSource && canalMedium ? (canalSource + ' / ' + canalMedium)
-    : (canalSource || canalMedium || '');
   var campanha = origem.campaign_name || origem.utm_campaign || '';
-  var adset = origem.adset_name || '';
+  var conjunto = origem.adset_name || '';
   var anuncio = origem.ad_name || origem.utm_content || '';
   var termo = origem.utm_term || '';
+  var fonte = resolveFonte(origem);
 
   var linhas = [];
-  if (canal) linhas.push('Canal: ' + canal);
   if (campanha) linhas.push('Campanha: ' + campanha);
-  if (adset) linhas.push('Conjunto de anúncios: ' + adset);
+  if (conjunto) linhas.push('Conjunto: ' + conjunto);
   if (anuncio) linhas.push('Anúncio: ' + anuncio);
   if (termo) linhas.push('Termo/Público: ' + termo);
-  if (origem.fbclid) linhas.push('Origem: Meta Ads (Facebook/Instagram)');
-  if (origem.gclid) linhas.push('Origem: Google Ads');
+  if (fonte) linhas.push('Fonte: ' + fonte);
 
   if (linhas.length === 0) return '';
 
@@ -240,7 +252,9 @@ confirmCheckbox.addEventListener('change', function () {
         origem,
         {
           campaign_name: origem.campaign_name || origem.utm_campaign || '',
-          ad_name: origem.ad_name || origem.utm_content || ''
+          adset_name: origem.adset_name || '',
+          ad_name: origem.ad_name || origem.utm_content || '',
+          fonte: resolveFonte(origem)
         }
       ));
       hasFiredLeadQualificado = true;
