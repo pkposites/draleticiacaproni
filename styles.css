@@ -200,39 +200,66 @@ p{line-height:1.7;color:var(--text-muted);margin:0 0 16px;}
 .qualify{padding:100px 0;background:var(--cream);}
 .qualify-inner{max-width:640px;margin:0 auto;}
 .qualify-sub{max-width:480px;margin:0 auto;}
-.qualify-form{margin-top:16px;}
-.form-step label{
-  display:block;font-family:var(--serif);font-size:20px;margin-bottom:20px;color:var(--text-dark);
-}
-.option-grid{display:grid;gap:12px;}
-.option-btn{
-  text-align:left;
-  padding:16px 20px;
-  border:1px solid rgba(0,0,0,.15);
+
+.confirm-box{
+  margin-top:24px;
+  padding:36px;
   background:#fff;
-  font-family:var(--sans);
-  font-size:15px;
+  border:1px solid rgba(0,0,0,.1);
+}
+.confirm-check{
+  display:flex;
+  align-items:flex-start;
+  gap:14px;
   cursor:pointer;
+  margin-bottom:28px;
+}
+.confirm-check input{
+  position:absolute;
+  opacity:0;
+  width:0;height:0;
+}
+.checkmark{
+  flex:0 0 22px;
+  width:22px;height:22px;
+  border:1px solid rgba(0,0,0,.3);
+  background:#fff;
+  position:relative;
+  margin-top:2px;
   transition:all .2s ease;
 }
-.option-btn:hover{border-color:var(--gold);}
-.option-btn.selected{
-  border-color:var(--gold);
+.confirm-check input:checked + .checkmark{
   background:var(--green-900);
-  color:var(--cream-dim);
+  border-color:var(--green-900);
 }
-.form-step input{
-  width:100%;
-  padding:14px 16px;
-  border:1px solid rgba(0,0,0,.15);
-  font-family:var(--sans);
-  font-size:15px;
-  margin-bottom:18px;
-  background:#fff;
+.confirm-check input:checked + .checkmark::after{
+  content:"";
+  position:absolute;
+  left:7px;top:3px;
+  width:6px;height:11px;
+  border:solid var(--gold-light);
+  border-width:0 2px 2px 0;
+  transform:rotate(45deg);
 }
-.progress-dots{display:flex;justify-content:center;gap:8px;margin-top:32px;}
-.dot-step{width:8px;height:8px;border-radius:50%;background:rgba(0,0,0,.15);}
-.dot-step.active{background:var(--gold);}
+.confirm-text{font-size:15px;color:var(--text-dark);line-height:1.6;}
+
+.btn-locked{
+  opacity:.4;
+  pointer-events:none;
+  filter:grayscale(.3);
+}
+.btn-locked.unlocked{
+  opacity:1;
+  pointer-events:auto;
+  filter:none;
+}
+.confirm-hint{
+  text-align:center;
+  font-size:13px;
+  margin:14px 0 0;
+  color:var(--text-muted);
+}
+.confirm-hint.hidden{display:none;}
 
 /* Final CTA */
 .final-cta{
@@ -293,9 +320,8 @@ p{line-height:1.7;color:var(--text-muted);margin:0 0 16px;}
   .proof-card p{font-size:16px;}
 
   .qualify-inner{max-width:100%;}
-  .form-step label{font-size:18px;}
-  .option-btn{padding:18px 18px;font-size:16px;}
-  .form-step input{font-size:16px;padding:16px;}
+  .confirm-box{padding:24px 20px;}
+  .confirm-text{font-size:14px;}
 
   .final-cta-inner .btn-lg{width:100%;}
 

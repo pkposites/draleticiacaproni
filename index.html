@@ -175,54 +175,29 @@
   <div class="container qualify-inner">
     <div class="section-heading center">
       <p class="eyebrow">Avaliação Inicial</p>
-      <h2>Responda 3 perguntas rápidas e fale com nossa equipe</h2>
+      <h2>Pronta para dar o próximo passo?</h2>
       <p class="qualify-sub">
-        Assim conseguimos entender seu momento e te direcionar para a
-        melhor solução da Dra. Letícia e da Clínica Exen.
+        Você conheceu o método da Dra. Letícia Caproni: avaliação individual,
+        planejamento estético da linha frontal, procedimento avançado e
+        recuperação assistida 24h — tudo dentro da Clínica Exen.
       </p>
     </div>
 
-    <form id="qualify-form" class="qualify-form">
-      <div class="form-step" data-step="1">
-        <label>O que você procura?</label>
-        <div class="option-grid">
-          <button type="button" class="option-btn" data-field="interesse" data-value="Transplante Capilar">Transplante Capilar</button>
-          <button type="button" class="option-btn" data-field="interesse" data-value="Sobrancelhas">Sobrancelhas</button>
-          <button type="button" class="option-btn" data-field="interesse" data-value="Avaliação Geral">Avaliação Geral / Ainda não sei</button>
-        </div>
-      </div>
+    <div class="confirm-box">
+      <label class="confirm-check">
+        <input type="checkbox" id="confirm-interesse">
+        <span class="checkmark" aria-hidden="true"></span>
+        <span class="confirm-text">
+          Entendi o método da Dra. Letícia Caproni e tenho interesse em
+          falar com a equipe para uma avaliação inicial e conhecer as
+          soluções da clínica Exen para o meu caso.
+        </span>
+      </label>
 
-      <div class="form-step" data-step="2" hidden>
-        <label>Há quanto tempo você percebe queda ou entrelinha capilar?</label>
-        <div class="option-grid">
-          <button type="button" class="option-btn" data-field="tempo" data-value="Menos de 1 ano">Menos de 1 ano</button>
-          <button type="button" class="option-btn" data-field="tempo" data-value="1 a 3 anos">1 a 3 anos</button>
-          <button type="button" class="option-btn" data-field="tempo" data-value="Mais de 3 anos">Mais de 3 anos</button>
-        </div>
-      </div>
-
-      <div class="form-step" data-step="3" hidden>
-        <label>Você tem interesse em falar com a equipe da Dra. Letícia para uma avaliação inicial e conhecer as soluções da clínica Exen?</label>
-        <div class="option-grid">
-          <button type="button" class="option-btn" data-field="interesse_contato" data-value="Sim, quero avaliação">Sim, quero avaliação</button>
-          <button type="button" class="option-btn" data-field="interesse_contato" data-value="Só pesquisando por enquanto">Só pesquisando por enquanto</button>
-        </div>
-      </div>
-
-      <div class="form-step" data-step="4" hidden>
-        <label for="nome">Perfeito. Para finalizar, como podemos te chamar?</label>
-        <input type="text" id="nome" name="nome" placeholder="Seu nome" required>
-        <label for="whatsapp">Seu WhatsApp (com DDD)</label>
-        <input type="tel" id="whatsapp" name="whatsapp" placeholder="(11) 90000-0000" required>
-        <button type="submit" class="btn btn-primary btn-block">Falar com a equipe no WhatsApp</button>
-      </div>
-    </form>
-
-    <div class="progress-dots">
-      <span class="dot-step active" data-dot="1"></span>
-      <span class="dot-step" data-dot="2"></span>
-      <span class="dot-step" data-dot="3"></span>
-      <span class="dot-step" data-dot="4"></span>
+      <a href="#" id="whatsapp-qualificado" class="btn btn-primary btn-block btn-locked" aria-disabled="true">
+        Falar com a equipe no WhatsApp
+      </a>
+      <p class="confirm-hint" id="confirm-hint">Marque a caixa acima para liberar o contato direto com a equipe.</p>
     </div>
   </div>
 </section>
