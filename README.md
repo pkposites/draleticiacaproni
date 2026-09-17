@@ -70,8 +70,8 @@ Todos os eventos passam por `trackEvent(nome, params)` em `script.js`, que:
 | `quiz_completo` | ao finalizar as 4 perguntas do quiz | envia todas as respostas |
 | `case_view` | ao trocar de slide no carrossel de antes/depois | `{ indice }` |
 | `cta_click` | clique no CTA final ou na barra fixa mobile (que só rolam a página) | `{ origem }` |
-| **`lead_qualificado`** | ao marcar a caixinha de confirmação (1x por sessão) | mapeado para `fbq('track', 'Lead')` |
-| **`lead_contato`** | ao clicar no botão de WhatsApp já liberado | evento de contato (Meta CAPI/Pixel customizado) |
+| **`lead_qualificado`** | ao marcar a caixinha de confirmação (1x por sessão) | mapeado para `fbq('trackCustom', 'lead_qualificado')` |
+| **`lead_contato`** | ao clicar no botão de WhatsApp já liberado | mapeado para `fbq('track', 'Lead')` — evento **padrão** do Meta Pixel |
 
 `lead_qualificado` e `lead_contato` são os dois eventos-chave pedidos pelo cliente para otimização de campanha.
 

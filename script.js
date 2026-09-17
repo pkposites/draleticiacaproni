@@ -89,8 +89,9 @@ captureOrigemParams();
 /* ============================================================
    TRACKING HELPERS
    - lead_qualificado: usuário leu a LP e confirmou interesse na caixinha
-     (libera o botão de WhatsApp)
-   - lead_contato: disparado em qualquer clique que leve ao WhatsApp
+     (libera o botão de WhatsApp) -> fbq trackCustom 'lead_qualificado'
+   - lead_contato: clique no botão de WhatsApp já liberado
+     -> fbq track 'Lead' (evento padrão do Meta Pixel)
 ============================================================= */
 function trackEvent(eventName, params) {
   params = params || {};
@@ -102,9 +103,9 @@ function trackEvent(eventName, params) {
   }
   if (typeof fbq === 'function') {
     if (eventName === 'lead_qualificado') {
-      fbq('track', 'Lead', params);
+      fbq('trackCustom', 'lead_qualificado', params);
     } else if (eventName === 'lead_contato') {
-      fbq('trackCustom', 'lead_contato', params);
+      fbq('track', 'Lead', params);
     }
   }
 }
