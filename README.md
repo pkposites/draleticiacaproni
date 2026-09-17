@@ -79,9 +79,10 @@ Todos os eventos passam por `trackEvent(nome, params)` em `script.js`, que:
 
 Tudo sinalizado com `TODO`/placeholder no código:
 
-1. **`index.html`** (`<head>`):
-   - `G-XXXXXXXXXX` → ID real do GA4
-   - `SEU_PIXEL_ID_AQUI` → ID real do Meta Pixel
+1. **`index.html`** (`<head>`) — já configurado:
+   - Meta Pixel: `1034926504222895`
+   - Microsoft Clarity: `yjrhuyxfsb`
+   - GA4 não está em uso (decisão do cliente)
 2. **`script.js`**:
    - `WHATSAPP_NUMBER` já está com o número real (`5511984954018`) — trocar apenas se mudar de número
 3. **Pendente (próxima fase, combinado com o cliente):**
