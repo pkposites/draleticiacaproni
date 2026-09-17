@@ -147,6 +147,10 @@ function sendToCapi(metaEventName, eventId) {
      -> fbq track 'Lead' (evento padrão do Meta Pixel)
    Ambos também são espelhados na Conversions API (server-side) com o
    mesmo event_id, para dedupe automático no Ads Manager.
+   - quiz_resposta / quiz_completo: engajamento com o quiz -> fbq
+     trackCustom (só navegador, sem CAPI — não são eventos de conversão)
+   - case_view / cta_click: ficam só no dataLayer, para uso futuro com
+     GTM/GA caso seja conectado; não têm efeito no Pixel hoje
 ============================================================= */
 function trackEvent(eventName, params) {
   params = params || {};
@@ -165,7 +169,13 @@ function trackEvent(eventName, params) {
       var leadId = generateEventId();
       fbq('track', 'Lead', params, { eventID: leadId });
       sendToCapi('Lead', leadId);
+    } else if (eventName === 'quiz_resposta' || eventName === 'quiz_completo') {
+      // Eventos de engajamento do quiz: enviados como custom event pro Pixel
+      // (só no navegador, sem espelho CAPI — não são eventos de conversão).
+      fbq('trackCustom', eventName, params);
     }
+    // case_view e cta_click ficam só no dataLayer: são sinais de engajamento
+    // pra uso futuro com GTM/GA, não eventos de conversão do Pixel.
   }
 }
 
@@ -302,6 +312,7 @@ var hasFiredLeadQualificado = false;
 confirmCheckbox.addEventListener('change', function () {
   if (confirmCheckbox.checked) {
     whatsappQualificado.classList.add('unlocked');
+    whatsappQualificado.disabled = false;
     whatsappQualificado.setAttribute('aria-disabled', 'false');
     confirmHint.classList.add('hidden');
 
@@ -321,6 +332,7 @@ confirmCheckbox.addEventListener('change', function () {
     }
   } else {
     whatsappQualificado.classList.remove('unlocked');
+    whatsappQualificado.disabled = true;
     whatsappQualificado.setAttribute('aria-disabled', 'true');
     confirmHint.classList.remove('hidden');
   }
@@ -329,8 +341,21 @@ confirmCheckbox.addEventListener('change', function () {
 whatsappQualificado.addEventListener('click', function (e) {
   e.preventDefault();
   if (!confirmCheckbox.checked) return;
+
+  // Abre a aba em branco AGORA (síncrono com o clique, exigido pelo Safari/iOS
+  // para não ser bloqueado como pop-up) e só troca a URL dela depois do
+  // tracking, dando tempo do fetch do CAPI sair antes do WhatsApp assumir.
+  var whatsappWindow = window.open('', '_blank');
   trackEvent('lead_contato', Object.assign({ origem: 'botao_qualificado' }, getOrigemParams()));
-  window.open(buildWhatsappUrl(), '_blank');
+
+  setTimeout(function () {
+    var url = buildWhatsappUrl();
+    if (whatsappWindow) {
+      whatsappWindow.location.href = url;
+    } else {
+      window.location.href = url; // pop-up bloqueado: segue na mesma aba
+    }
+  }, 300);
 });
 
 /* ============================================================
