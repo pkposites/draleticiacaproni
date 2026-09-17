@@ -71,16 +71,15 @@ function buildOrigemMessageBlock(origem) {
   var termo = origem.utm_term || '';
   var fonte = resolveFonte(origem);
 
-  var linhas = [];
+  // "Fonte do lead:" sempre é a primeira linha do bloco (mesmo padrão da
+  // LP Excalibur), mesmo sem UTM — nesse caso cai no fallback "Direto/Orgânico".
+  var linhas = ['Fonte do lead: ' + (fonte || 'Direto/Orgânico')];
   if (campanha) linhas.push('Campanha: ' + campanha);
   if (conjunto) linhas.push('Conjunto: ' + conjunto);
   if (anuncio) linhas.push('Anúncio: ' + anuncio);
   if (termo) linhas.push('Termo/Público: ' + termo);
-  if (fonte) linhas.push('Fonte: ' + fonte);
 
-  if (linhas.length === 0) return '';
-
-  return '\n\nOrigem do lead:\n' + linhas.join('\n');
+  return '\n\n' + linhas.join('\n');
 }
 
 /* Captura assim que o script carrega, para não perder o clique inicial */
