@@ -93,7 +93,7 @@ captureOrigemParams();
    Preencher CAPI_ENDPOINT com a URL do worker depois do deploy
    (ex: https://caproni-capi.<subdomínio>.workers.dev).
 ============================================================= */
-var CAPI_ENDPOINT = ''; // TODO: colar a URL do worker (caproni-capi) depois do deploy
+var CAPI_ENDPOINT = 'https://draleticiacapronicapi.robson-oc96.workers.dev';
 var LEAD_REF_KEY = 'lead_ref';
 
 function getOrCreateLeadRef() {
