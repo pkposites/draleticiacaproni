@@ -87,11 +87,66 @@ function buildOrigemMessageBlock(origem) {
 captureOrigemParams();
 
 /* ============================================================
+   CAPI (Conversions API) — envio server-side via Cloudflare Worker
+   Espelha lead_qualificado/lead_contato no servidor, com o mesmo
+   event_id do fbq() do navegador (dedupe automático no Ads Manager).
+   Preencher CAPI_ENDPOINT com a URL do worker depois do deploy
+   (ex: https://caproni-capi.<subdomínio>.workers.dev).
+============================================================= */
+var CAPI_ENDPOINT = ''; // TODO: colar a URL do worker (caproni-capi) depois do deploy
+var LEAD_REF_KEY = 'lead_ref';
+
+function getOrCreateLeadRef() {
+  try {
+    var ref = localStorage.getItem(LEAD_REF_KEY);
+    if (!ref) {
+      ref = 'ref-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 10);
+      localStorage.setItem(LEAD_REF_KEY, ref);
+    }
+    return ref;
+  } catch (e) {
+    return '';
+  }
+}
+
+function getCookie(name) {
+  var match = document.cookie.match(new RegExp('(?:^|; )' + name + '=([^;]*)'));
+  return match ? decodeURIComponent(match[1]) : '';
+}
+
+function generateEventId() {
+  return 'evt-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 10);
+}
+
+function sendToCapi(metaEventName, eventId) {
+  if (!CAPI_ENDPOINT) return; // worker ainda não configurado nesta LP
+
+  var payload = {
+    event_name: metaEventName,
+    event_id: eventId,
+    event_source_url: window.location.href,
+    fbp: getCookie('_fbp'),
+    fbc: getCookie('_fbc'),
+    attribution: getOrigemParams(),
+    ref: getOrCreateLeadRef()
+  };
+
+  fetch(CAPI_ENDPOINT.replace(/\/$/, '') + '/event', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+    keepalive: true
+  }).catch(function () { /* falha no envio server-side não deve travar o fluxo do usuário */ });
+}
+
+/* ============================================================
    TRACKING HELPERS
    - lead_qualificado: usuário leu a LP e confirmou interesse na caixinha
      (libera o botão de WhatsApp) -> fbq trackCustom 'lead_qualificado'
    - lead_contato: clique no botão de WhatsApp já liberado
      -> fbq track 'Lead' (evento padrão do Meta Pixel)
+   Ambos também são espelhados na Conversions API (server-side) com o
+   mesmo event_id, para dedupe automático no Ads Manager.
 ============================================================= */
 function trackEvent(eventName, params) {
   params = params || {};
@@ -103,9 +158,13 @@ function trackEvent(eventName, params) {
   }
   if (typeof fbq === 'function') {
     if (eventName === 'lead_qualificado') {
-      fbq('trackCustom', 'lead_qualificado', params);
+      var qualId = generateEventId();
+      fbq('trackCustom', 'lead_qualificado', params, { eventID: qualId });
+      sendToCapi('lead_qualificado', qualId);
     } else if (eventName === 'lead_contato') {
-      fbq('track', 'Lead', params);
+      var leadId = generateEventId();
+      fbq('track', 'Lead', params, { eventID: leadId });
+      sendToCapi('Lead', leadId);
     }
   }
 }

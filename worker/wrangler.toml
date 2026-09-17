@@ -1,0 +1,18 @@
+name = "caproni-capi"
+main = "index.js"
+compatibility_date = "2026-01-01"
+
+[vars]
+PIXEL_ID = "1034926504222895"
+ALLOWED_ORIGIN = "https://dra-leticia-caproni.netlify.app"
+
+# Segredos (não vão no git — configurar via `wrangler secret put` ou no dashboard):
+#   META_ACCESS_TOKEN     -> token de sistema do Business Manager (ads_management)
+#   OFFLINE_EVENTS_TOKEN  -> token qualquer que você define, usado pra autenticar
+#                            a equipe reportando eventos offline (avaliação/cirurgia)
+# Opcional:
+#   TEST_EVENT_CODE       -> código do "Testar eventos" no Events Manager
+
+[[kv_namespaces]]
+binding = "LEADS"
+id = "3fdac85e78554d72b1d234ffbf66ac64"

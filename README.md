@@ -85,10 +85,25 @@ Tudo sinalizado com `TODO`/placeholder no código:
    - GA4 não está em uso (decisão do cliente)
 2. **`script.js`**:
    - `WHATSAPP_NUMBER` já está com o número real (`5511984954018`) — trocar apenas se mudar de número
-3. **Pendente (próxima fase, combinado com o cliente):**
-   - Configuração de Conversions API (CAPI) do Meta
-   - Deduplicação de eventos entre Pixel (browser) e CAPI (server-side)
-   - Domínio final cadastrado no Business Manager (necessário para CAPI/Pixel em domínios verificados)
+   - `CAPI_ENDPOINT` — vazio até o worker (ver seção "CAPI / Cloudflare Worker" abaixo) ser publicado; enquanto vazio, o site funciona normal e só não envia eventos server-side
+3. **Domínio final cadastrado no Business Manager** (necessário para Pixel/CAPI em domínios verificados)
+
+## CAPI / Cloudflare Worker
+
+Worker em `worker/` (`index.js` + `wrangler.toml`), no mesmo padrão usado nos outros projetos da conta (ex: `capi-excalibur`). Ele espelha os eventos do navegador (Pixel) no servidor via Meta Conversions API, usando o mesmo `event_id` para dedupe automático no Ads Manager.
+
+**Fluxo:**
+- `POST /event` — recebe `lead_qualificado` e `Lead` (contato) direto do `script.js` da LP, com `fbp`/`fbc` (cookies do Pixel), atribuição (UTMs/Meta Ads) e um `ref` salvo no `localStorage` do visitante.
+- `POST /offline-event` — pra reportar manualmente, depois da conversa no WhatsApp, quando o lead vira **avaliação realizada** (`AvaliacaoRealizada` → `Schedule`) ou **cirurgia agendada** (`CirurgiaAgendada` → `Purchase`). Casa com o clique original via o `ref` guardado no KV `LEADS`.
+
+**Como publicar (não há tool de deploy de Worker disponível nesta sessão — passos manuais):**
+1. No dashboard da Cloudflare → Workers & Pages → Create → **Import a repository**, aponte pro repositório `pkposites/draleticiacaproni`, com **Root directory** = `worker/`.
+2. Configurar variáveis/segredos do Worker:
+   - `META_ACCESS_TOKEN` (secret) — token de sistema do Business Manager com permissão `ads_management`
+   - `OFFLINE_EVENTS_TOKEN` (secret) — token à sua escolha, usado pra autenticar quem reporta eventos offline
+   - `PIXEL_ID` e `ALLOWED_ORIGIN` (vars) já vêm preenchidos no `wrangler.toml`, ajustar `ALLOWED_ORIGIN` se o domínio final for diferente de `dra-leticia-caproni.netlify.app`
+   - Binding KV `LEADS` já apontado pro namespace `caproni-leads` (id `3fdac85e78554d72b1d234ffbf66ac64`), criado nesta conta Cloudflare
+3. Depois de publicado, copiar a URL do Worker (`https://caproni-capi.<subdomínio>.workers.dev`) e colar em `CAPI_ENDPOINT` no `script.js`.
 
 ## Deploy
 
