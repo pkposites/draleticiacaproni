@@ -311,7 +311,6 @@ var hasFiredLeadQualificado = false;
 confirmCheckbox.addEventListener('change', function () {
   if (confirmCheckbox.checked) {
     whatsappQualificado.classList.add('unlocked');
-    whatsappQualificado.disabled = false;
     whatsappQualificado.setAttribute('aria-disabled', 'false');
     confirmHint.classList.add('hidden');
 
@@ -331,15 +330,37 @@ confirmCheckbox.addEventListener('change', function () {
     }
   } else {
     whatsappQualificado.classList.remove('unlocked');
-    whatsappQualificado.disabled = true;
     whatsappQualificado.setAttribute('aria-disabled', 'true');
     confirmHint.classList.remove('hidden');
   }
 });
 
+var confirmCheckLabel = document.getElementById('confirm-check');
+var confirmBox = document.getElementById('confirm-box');
+
+function callAttentionToCheckbox() {
+  confirmBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+  // Reinicia a animação mesmo se o usuário clicar de novo rapidamente
+  confirmCheckLabel.classList.remove('attention');
+  // eslint-disable-next-line no-unused-expressions
+  void confirmCheckLabel.offsetWidth; // força reflow pra reiniciar a animação CSS
+  confirmCheckLabel.classList.add('attention');
+
+  clearTimeout(callAttentionToCheckbox._timer);
+  callAttentionToCheckbox._timer = setTimeout(function () {
+    confirmCheckLabel.classList.remove('attention');
+  }, 1600);
+
+  trackEvent('cta_click', { origem: 'whatsapp_bloqueado_sem_confirmar' });
+}
+
 whatsappQualificado.addEventListener('click', function (e) {
   e.preventDefault();
-  if (!confirmCheckbox.checked) return;
+  if (!confirmCheckbox.checked) {
+    callAttentionToCheckbox();
+    return;
+  }
 
   // Abre a aba em branco AGORA (síncrono com o clique, exigido pelo Safari/iOS
   // para não ser bloqueado como pop-up) e só troca a URL dela depois do

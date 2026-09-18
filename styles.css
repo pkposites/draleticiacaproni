@@ -433,14 +433,30 @@ p{line-height:1.7;color:var(--text-muted);margin:0 0 16px;}
 .confirm-text{font-size:15px;color:var(--text-dark);line-height:1.6;}
 
 .btn-locked{
-  opacity:.4;
-  pointer-events:none;
+  opacity:.55;
+  cursor:not-allowed;
   filter:grayscale(.3);
 }
 .btn-locked.unlocked{
   opacity:1;
-  pointer-events:auto;
+  cursor:pointer;
   filter:none;
+}
+
+/* Chacoalhão + destaque na caixinha quando clicam no botão sem marcar */
+@keyframes shake-attention{
+  10%,90%{transform:translateX(-1px);}
+  20%,80%{transform:translateX(2px);}
+  30%,50%,70%{transform:translateX(-4px);}
+  40%,60%{transform:translateX(4px);}
+}
+.confirm-check.attention .checkmark{
+  animation:shake-attention .6s cubic-bezier(.36,.07,.19,.97) both;
+  border-color:#c0392b;
+  box-shadow:0 0 0 4px rgba(192,57,43,.15);
+}
+.confirm-check.attention .confirm-text{
+  color:#c0392b;
 }
 .confirm-hint{
   text-align:center;
