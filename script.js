@@ -338,7 +338,7 @@ confirmCheckbox.addEventListener('change', function () {
 var confirmCheckLabel = document.getElementById('confirm-check');
 var confirmBox = document.getElementById('confirm-box');
 
-function callAttentionToCheckbox() {
+function callAttentionToCheckbox(origem) {
   confirmBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
   // Reinicia a animação mesmo se o usuário clicar de novo rapidamente
@@ -352,13 +352,13 @@ function callAttentionToCheckbox() {
     confirmCheckLabel.classList.remove('attention');
   }, 1600);
 
-  trackEvent('cta_click', { origem: 'whatsapp_bloqueado_sem_confirmar' });
+  trackEvent('cta_click', { origem: origem || 'whatsapp_bloqueado_sem_confirmar' });
 }
 
 whatsappQualificado.addEventListener('click', function (e) {
   e.preventDefault();
   if (!confirmCheckbox.checked) {
-    callAttentionToCheckbox();
+    callAttentionToCheckbox('whatsapp_bloqueado_sem_confirmar');
     return;
   }
 
@@ -379,21 +379,55 @@ whatsappQualificado.addEventListener('click', function (e) {
 });
 
 /* ============================================================
-   DEMAIS CTAs (CTA final e barra fixa mobile)
-   Estes NÃO abrem o WhatsApp diretamente — apenas rolam até a
-   seção de qualificação. O único caminho até o WhatsApp é o botão
-   liberado pela caixinha de confirmação acima.
+   DEMAIS CTAs (header, CTA final e barra fixa mobile)
+   Estes NÃO abrem o WhatsApp diretamente — levam até a caixinha de
+   confirmação com o mesmo destaque (chacoalhão + cor) do botão
+   bloqueado, já deixando claro o que falta pra liberar o contato.
+   O único caminho até o WhatsApp é o botão liberado pela caixinha.
 ============================================================= */
+function goToConfirmBox(e, origem) {
+  if (e) e.preventDefault();
+  callAttentionToCheckbox(origem);
+}
+
+var ctaHeaderScroll = document.querySelector('.header-cta');
+if (ctaHeaderScroll) {
+  ctaHeaderScroll.addEventListener('click', function (e) {
+    goToConfirmBox(e, 'cta_header');
+  });
+}
+
 var ctaFinalScroll = document.getElementById('cta-final-scroll');
 if (ctaFinalScroll) {
-  ctaFinalScroll.addEventListener('click', function () {
-    trackEvent('cta_click', { origem: 'cta_final' });
+  ctaFinalScroll.addEventListener('click', function (e) {
+    goToConfirmBox(e, 'cta_final');
   });
 }
 
 var ctaStickyScroll = document.getElementById('cta-sticky-scroll');
 if (ctaStickyScroll) {
-  ctaStickyScroll.addEventListener('click', function () {
-    trackEvent('cta_click', { origem: 'barra_fixa_mobile' });
+  ctaStickyScroll.addEventListener('click', function (e) {
+    goToConfirmBox(e, 'barra_fixa_mobile');
   });
+}
+
+/* ============================================================
+   BARRA FIXA MOBILE: esconder perto do rodapé
+   Some quando a seção de qualificação entra na tela — a partir dali
+   o CTA final já cumpre o mesmo papel, e ter os dois juntos empilhados
+   no fim da página é redundante.
+============================================================= */
+var mobileStickyCta = document.querySelector('.mobile-sticky-cta');
+if (mobileStickyCta && 'IntersectionObserver' in window) {
+  var qualifySection = document.getElementById('qualificacao');
+  var stickyObserver = new IntersectionObserver(function (entries) {
+    entries.forEach(function (entry) {
+      // Esconde assim que a seção de qualificação entra na tela e continua
+      // escondida dali pra baixo (CTA final, rodapé) — só reaparece se o
+      // usuário rolar de volta pra cima, antes de chegar nela.
+      var jaPassouDaSecao = entry.boundingClientRect.top <= 0;
+      mobileStickyCta.classList.toggle('is-hidden', entry.isIntersecting || jaPassouDaSecao);
+    });
+  }, { threshold: 0 });
+  stickyObserver.observe(qualifySection);
 }

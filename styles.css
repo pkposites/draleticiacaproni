@@ -560,8 +560,15 @@ p{line-height:1.7;color:var(--text-muted);margin:0 0 16px;}
     background:var(--green-900);
     border-top:1px solid rgba(201,169,106,.35);
     box-shadow:0 -12px 24px -16px rgba(0,0,0,.35);
+    transform:translateY(0);
+    transition:transform .3s ease;
+  }
+  .mobile-sticky-cta.is-hidden{
+    transform:translateY(100%);
+    pointer-events:none;
   }
   .mobile-sticky-cta .btn{width:100%;padding:14px;font-size:13px;}
-  /* espaço extra no fim da página para a barra fixa não cobrir o footer */
-  .site-footer{padding-bottom:88px;}
+  /* espaço extra no fim da página para a barra fixa não cobrir o footer,
+     só enquanto ela está visível */
+  body:has(.mobile-sticky-cta:not(.is-hidden)) .site-footer{padding-bottom:88px;}
 }
