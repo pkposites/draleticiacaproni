@@ -415,6 +415,13 @@ if (ctaHeaderScroll) {
   });
 }
 
+var ctaHeroScroll = document.getElementById('cta-hero-scroll');
+if (ctaHeroScroll) {
+  ctaHeroScroll.addEventListener('click', function (e) {
+    goToConfirmBox(e, 'cta_hero');
+  });
+}
+
 var ctaFinalScroll = document.getElementById('cta-final-scroll');
 if (ctaFinalScroll) {
   ctaFinalScroll.addEventListener('click', function (e) {

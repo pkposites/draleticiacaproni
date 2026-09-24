@@ -33,9 +33,10 @@ Sem dependência de build, framework ou Node — é só abrir/hospedar os 3 arqu
 
 ## Regra de negócio central: WhatsApp só libera pela caixinha
 
-Por decisão do cliente, **existe um único caminho até o WhatsApp**: o botão dentro da seção de qualificação (`#qualificacao`), que fica travado (`btn-locked`, opacidade reduzida, `pointer-events:none`) até o usuário marcar a checkbox de confirmação.
+Por decisão do cliente, **existe um único caminho até o WhatsApp**: o botão dentro da seção de qualificação (`#qualificacao`), que fica travado (`btn-locked`, opacidade reduzida) até o usuário marcar a checkbox de confirmação.
 
-- CTA do header, CTA final e barra fixa mobile **não abrem o WhatsApp** — eles apenas fazem scroll até `#qualificacao` (`href="#qualificacao"`).
+- CTA do hero (`#cta-hero-scroll`), do header (`.header-cta`), CTA final (`#cta-final-scroll`) e barra fixa mobile (`#cta-sticky-scroll`) **não abrem o WhatsApp** — todos levam até a caixinha de confirmação com o mesmo destaque visual (chacoalhão + borda/texto vermelhos por ~1,6s) usado quando alguém clica no botão de WhatsApp ainda travado. Isso deixa claro o que falta fazer, em vez de só rolar a página.
+- O próprio botão de WhatsApp continua clicável mesmo travado (sem `disabled`/`pointer-events:none`) exatamente pra poder capturar esse clique e disparar o mesmo destaque.
 - Isso é intencional: força a passagem pelo quiz/leitura antes do contato, gerando um lead mais qualificado.
 
 Se um dia quiser liberar contato direto em algum ponto, é só trocar o `href` de volta para abrir `buildWhatsappUrl()` via JS (ver como era feito antes no botão `whatsapp-qualificado`).
