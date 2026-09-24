@@ -10,6 +10,8 @@
   TRACKING SETUP
   - Meta Pixel
   - Microsoft Clarity
+  - Lead Hub (injeta código de rastreio na URL do WhatsApp; ver
+    window.LeadHub.whatsappUrl() em script.js)
   Eventos disparados neste site:
     - "lead_qualificado" -> quando o usuário completa o mini-quiz de qualificação
     - "lead_contato"      -> quando o usuário clica em qualquer botão de WhatsApp
@@ -37,6 +39,9 @@
   fbq('init', '1034926504222895');
   fbq('track', 'PageView');
 </script>
+
+<!-- Lead Hub -->
+<script src="https://leadinghub.netlify.app/tracker.js" data-key="pk_040d040dee18447c83babc304f32e461" async></script>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

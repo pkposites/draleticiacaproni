@@ -370,10 +370,13 @@ whatsappQualificado.addEventListener('click', function (e) {
 
   setTimeout(function () {
     var url = buildWhatsappUrl();
+    // Lead Hub intercepta o clique e injeta o código de rastreio na URL;
+    // se o script não carregar por qualquer motivo, segue com a URL normal.
+    var destino = window.LeadHub ? window.LeadHub.whatsappUrl(url) : url;
     if (whatsappWindow) {
-      whatsappWindow.location.href = url;
+      whatsappWindow.location.href = destino;
     } else {
-      window.location.href = url; // pop-up bloqueado: segue na mesma aba
+      window.location.href = destino; // pop-up bloqueado: segue na mesma aba
     }
   }, 300);
 });

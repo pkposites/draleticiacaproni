@@ -82,6 +82,7 @@ Tudo sinalizado com `TODO`/placeholder no código:
 1. **`index.html`** (`<head>`) — já configurado:
    - Meta Pixel: `1034926504222895`
    - Microsoft Clarity: `yjrhuyxfsb`
+   - Lead Hub: `pk_040d040dee18447c83babc304f32e461` — script `https://leadinghub.netlify.app/tracker.js`, injeta um código de rastreio na mensagem de WhatsApp (registra o clique numa planilha externa com a origem do anúncio). A troca de URL fica em `script.js`, na chamada `window.LeadHub.whatsappUrl(url)` (com fallback pra URL normal se o script não carregar)
    - GA4 não está em uso (decisão do cliente)
 2. **`script.js`**:
    - `WHATSAPP_NUMBER` já está com o número real (`5511984954018`) — trocar apenas se mudar de número
