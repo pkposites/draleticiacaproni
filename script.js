@@ -179,8 +179,13 @@ function trackEvent(eventName, params) {
 }
 
 function buildWhatsappUrl() {
-  var msg = "Olá! Vim através da página da Dra. Letícia Caproni e gostaria "
+  var nome = (leadNomeInput && leadNomeInput.value.trim()) || '';
+  var telefone = (leadTelefoneInput && leadTelefoneInput.value.trim()) || '';
+
+  var msg = nome ? "Olá! Meu nome é " + nome + "." : "Olá!";
+  msg += " Vim através da página da Dra. Letícia Caproni e gostaria "
     + "de agendar uma avaliação inicial com a equipe da Clínica Exen.";
+  if (telefone) msg += "\n\nMeu WhatsApp: " + telefone;
 
   if (quizAnswers.queixa) {
     msg += "\n\nMeu perfil:";
@@ -306,6 +311,9 @@ if (quizRestart) {
 var confirmCheckbox = document.getElementById('confirm-interesse');
 var whatsappQualificado = document.getElementById('whatsapp-qualificado');
 var confirmHint = document.getElementById('confirm-hint');
+var optionalFields = document.getElementById('optional-fields');
+var leadNomeInput = document.getElementById('lead-nome');
+var leadTelefoneInput = document.getElementById('lead-telefone');
 var hasFiredLeadQualificado = false;
 
 confirmCheckbox.addEventListener('change', function () {
@@ -313,6 +321,7 @@ confirmCheckbox.addEventListener('change', function () {
     whatsappQualificado.classList.add('unlocked');
     whatsappQualificado.setAttribute('aria-disabled', 'false');
     confirmHint.classList.add('hidden');
+    optionalFields.hidden = false;
 
     if (!hasFiredLeadQualificado) {
       var origem = getOrigemParams();
@@ -332,6 +341,7 @@ confirmCheckbox.addEventListener('change', function () {
     whatsappQualificado.classList.remove('unlocked');
     whatsappQualificado.setAttribute('aria-disabled', 'true');
     confirmHint.classList.remove('hidden');
+    optionalFields.hidden = true;
   }
 });
 
@@ -367,6 +377,11 @@ whatsappQualificado.addEventListener('click', function (e) {
   // tracking, dando tempo do fetch do CAPI sair antes do WhatsApp assumir.
   var whatsappWindow = window.open('', '_blank');
   trackEvent('lead_contato', Object.assign({ origem: 'botao_qualificado' }, getOrigemParams()));
+
+  var leadNome = (leadNomeInput && leadNomeInput.value.trim()) || '';
+  if (leadNome && window.LeadHub && typeof window.LeadHub.identify === 'function') {
+    window.LeadHub.identify({ name: leadNome });
+  }
 
   setTimeout(function () {
     var url = buildWhatsappUrl();

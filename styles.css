@@ -432,6 +432,42 @@ p{line-height:1.7;color:var(--text-muted);margin:0 0 16px;}
 }
 .confirm-text{font-size:15px;color:var(--text-dark);line-height:1.6;}
 
+/* Campos opcionais de nome/telefone (aparecem só depois de marcar a caixinha) */
+.optional-fields{
+  margin:0 0 20px;
+  padding-top:20px;
+  border-top:1px dashed rgba(0,0,0,.12);
+  display:grid;
+  gap:10px;
+  animation:optional-fields-in .3s ease;
+}
+.optional-fields-hint{
+  font-size:12px;
+  color:var(--text-muted);
+  margin:0 0 2px;
+  font-style:italic;
+}
+.optional-fields input{
+  width:100%;
+  padding:12px 14px;
+  border:1px solid rgba(0,0,0,.15);
+  border-radius:var(--radius);
+  font-family:var(--sans);
+  font-size:15px;
+  background:var(--cream);
+  color:var(--text-dark);
+  transition:border-color .2s ease;
+}
+.optional-fields input:focus{
+  outline:none;
+  border-color:var(--gold);
+}
+.optional-fields input::placeholder{color:var(--text-muted);}
+@keyframes optional-fields-in{
+  from{opacity:0;transform:translateY(-6px);}
+  to{opacity:1;transform:translateY(0);}
+}
+
 .btn-locked{
   opacity:.55;
   cursor:not-allowed;
