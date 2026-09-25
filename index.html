@@ -19,13 +19,15 @@
   Nada do quiz, de campanha/anúncio ou de saúde vai para a Meta.
 ============================================================= -->
 
-<!-- Microsoft Clarity -->
+<!-- Microsoft Clarity — só carrega depois do consentimento (ver bloco LGPD) -->
 <script type="text/javascript">
+  function loadClarity() {
     (function(c,l,a,r,i,t,y){
         c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
         t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
         y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
     })(window, document, "clarity", "script", "yjrhuyxfsb");
+  }
 </script>
 
 <!-- Privacidade dos dados enviados à Meta (roda ANTES do pixel)
@@ -73,27 +75,83 @@
   })();
 </script>
 
-<!-- Meta Pixel
+<!-- Meta Pixel — só carrega depois do consentimento (ver bloco LGPD)
   - autoConfig desligado: o pixel não coleta sozinho textos de botões nem
     metadados da página (título/descrição), que falam de saúde.
   - external_id (ID do visitante) vai no init; o pixel aplica o hash.
 ============================================================= -->
 <script>
-  !function(f,b,e,v,n,t,s)
-  {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-  n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-  if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-  n.queue=[];t=b.createElement(e);t.async=!0;
-  t.src=v;s=b.getElementsByTagName(e)[0];
-  s.parentNode.insertBefore(t,s)}(window, document,'script',
-  'https://connect.facebook.net/en_US/fbevents.js');
-  fbq('set', 'autoConfig', false, '1034926504222895');
-  fbq('init', '1034926504222895', window.leadRef ? { external_id: window.leadRef } : {});
-  fbq('track', 'PageView');
+  function loadMetaPixel() {
+    !function(f,b,e,v,n,t,s)
+    {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+    n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+    if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+    n.queue=[];t=b.createElement(e);t.async=!0;
+    t.src=v;s=b.getElementsByTagName(e)[0];
+    s.parentNode.insertBefore(t,s)}(window, document,'script',
+    'https://connect.facebook.net/en_US/fbevents.js');
+    fbq('set', 'autoConfig', false, '1034926504222895');
+    fbq('init', '1034926504222895', window.leadRef ? { external_id: window.leadRef } : {});
+    fbq('track', 'PageView');
+  }
 </script>
 
-<!-- Lead Hub -->
-<script src="https://leadinghub.netlify.app/tracker.js" data-key="pk_040d040dee18447c83babc304f32e461" async></script>
+<!-- Lead Hub — só carrega depois do consentimento (ver bloco LGPD) -->
+<script>
+  function loadLeadHub() {
+    var s = document.createElement('script');
+    s.src = 'https://leadinghub.netlify.app/tracker.js';
+    s.setAttribute('data-key', 'pk_040d040dee18447c83babc304f32e461');
+    s.async = true;
+    document.head.appendChild(s);
+  }
+</script>
+
+<!-- ============================================================
+  CONSENTIMENTO DE COOKIES (LGPD)
+  Pixel, Clarity e Lead Hub só são carregados depois que a pessoa clica
+  em "Aceitar" no banner. Em "Recusar", nenhum deles carrega e a LP
+  segue funcionando normalmente (WhatsApp, quiz etc. não dependem disso).
+  A escolha fica salva em localStorage.lgpd_consent.
+============================================================= -->
+<script>
+  (function () {
+    var KEY = 'lgpd_consent';
+    var consent = '';
+    try { consent = localStorage.getItem(KEY) || ''; } catch (e) {}
+
+    function activateTracking() {
+      try { loadClarity(); } catch (e) {}
+      try { loadMetaPixel(); } catch (e) {}
+      try { loadLeadHub(); } catch (e) {}
+    }
+
+    if (consent === 'accepted') {
+      activateTracking();
+      return;
+    }
+    if (consent === 'rejected') return;
+
+    document.addEventListener('DOMContentLoaded', function () {
+      var banner = document.getElementById('lgpd-banner');
+      if (!banner) return;
+      banner.hidden = false;
+
+      var accept = document.getElementById('lgpd-accept');
+      var reject = document.getElementById('lgpd-reject');
+
+      accept.addEventListener('click', function () {
+        try { localStorage.setItem(KEY, 'accepted'); } catch (e) {}
+        banner.hidden = true;
+        activateTracking();
+      });
+      reject.addEventListener('click', function () {
+        try { localStorage.setItem(KEY, 'rejected'); } catch (e) {}
+        banner.hidden = true;
+      });
+    });
+  })();
+</script>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -101,6 +159,17 @@
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+
+<!-- ===================== BANNER DE COOKIES (LGPD) ===================== -->
+<div class="lgpd-banner" id="lgpd-banner" hidden role="dialog" aria-label="Aviso de cookies">
+  <div class="lgpd-banner-text">
+    Usamos cookies e tecnologias semelhantes (Meta Pixel, Microsoft Clarity e Lead Hub) para entender como você usa esta página e medir a origem dos contatos vindos de anúncios. Você pode aceitar ou recusar — a página funciona normalmente de qualquer jeito.
+  </div>
+  <div class="lgpd-banner-actions">
+    <button type="button" id="lgpd-reject" class="btn btn-outline lgpd-btn">Recusar</button>
+    <button type="button" id="lgpd-accept" class="btn btn-primary lgpd-btn">Aceitar</button>
+  </div>
+</div>
 
 <!-- ===================== HEADER ===================== -->
 <header class="site-header">

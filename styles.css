@@ -441,6 +441,7 @@ p{line-height:1.7;color:var(--text-muted);margin:0 0 16px;}
   gap:10px;
   animation:optional-fields-in .3s ease;
 }
+.optional-fields[hidden]{display:none;}
 .optional-fields-hint{
   font-size:12px;
   color:var(--text-muted);
@@ -607,4 +608,49 @@ p{line-height:1.7;color:var(--text-muted);margin:0 0 16px;}
   /* espaço extra no fim da página para a barra fixa não cobrir o footer,
      só enquanto ela está visível */
   body:has(.mobile-sticky-cta:not(.is-hidden)) .site-footer{padding-bottom:88px;}
+}
+
+/* Banner de cookies (LGPD) */
+.lgpd-banner{
+  position:fixed;
+  left:16px;right:16px;bottom:16px;
+  z-index:80;
+  max-width:640px;
+  margin:0 auto;
+  padding:20px 24px;
+  background:var(--green-900);
+  color:var(--cream);
+  border:1px solid rgba(201,169,106,.35);
+  border-radius:var(--radius-lg);
+  box-shadow:0 24px 48px -20px rgba(0,0,0,.5);
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  gap:16px;
+}
+.lgpd-banner[hidden]{display:none;}
+.lgpd-banner-text{
+  flex:1 1 280px;
+  font-size:13px;
+  line-height:1.6;
+  color:#cfd6cf;
+}
+.lgpd-banner-actions{
+  display:flex;
+  gap:10px;
+  flex:0 0 auto;
+}
+.lgpd-btn{padding:10px 20px;font-size:12px;}
+.lgpd-banner .btn-outline{color:var(--gold-light);border-color:var(--gold-light);}
+.lgpd-banner .btn-outline:hover{background:var(--gold-light);color:var(--green-900);}
+
+@media(max-width:600px){
+  .lgpd-banner{
+    left:12px;right:12px;bottom:12px;
+    padding:16px 18px;
+    flex-direction:column;
+    align-items:stretch;
+  }
+  .lgpd-banner-actions{width:100%;}
+  .lgpd-btn{flex:1;}
 }
