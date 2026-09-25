@@ -123,10 +123,11 @@ function sendToCapi(metaEventName, eventId) {
   var payload = {
     event_name: metaEventName,
     event_id: eventId,
-    event_source_url: window.location.href,
+    // Sem query string (UTMs/nomes de campanha) e sem attribution:
+    // evita mandar pra Meta qualquer termo que possa soar como dado de saúde.
+    event_source_url: window.location.origin + window.location.pathname,
     fbp: getCookie('_fbp'),
     fbc: getCookie('_fbc'),
-    attribution: getOrigemParams(),
     ref: getOrCreateLeadRef()
   };
 
@@ -146,10 +147,10 @@ function sendToCapi(metaEventName, eventId) {
      -> fbq track 'Lead' (evento padrão do Meta Pixel)
    Ambos também são espelhados na Conversions API (server-side) com o
    mesmo event_id, para dedupe automático no Ads Manager.
-   - quiz_resposta / quiz_completo: engajamento com o quiz -> fbq
-     trackCustom (só navegador, sem CAPI — não são eventos de conversão)
-   - case_view / cta_click: ficam só no dataLayer, para uso futuro com
-     GTM/GA caso seja conectado; não têm efeito no Pixel hoje
+   Nenhum parâmetro vai pra Meta (nem UTM, nem resposta do quiz).
+   - quiz_resposta / quiz_completo / case_view / cta_click: ficam só no
+     dataLayer. NUNCA mandar respostas do quiz pro Pixel: são dados de
+     saúde e fazem a Meta bloquear o domínio.
 ============================================================= */
 function trackEvent(eventName, params) {
   params = params || {};
@@ -159,22 +160,21 @@ function trackEvent(eventName, params) {
   if (typeof gtag === 'function') {
     gtag('event', eventName, params);
   }
+  // Pro Pixel/CAPI vão só o nome do evento, sem parâmetros: a Meta bloqueia
+  // o domínio se receber dados de saúde (respostas do quiz, queixa etc.).
+  // Os parâmetros ficam só no dataLayer local.
   if (typeof fbq === 'function') {
     if (eventName === 'lead_qualificado') {
       var qualId = generateEventId();
-      fbq('trackCustom', 'lead_qualificado', params, { eventID: qualId });
+      fbq('trackCustom', 'lead_qualificado', {}, { eventID: qualId });
       sendToCapi('lead_qualificado', qualId);
     } else if (eventName === 'lead_contato') {
       var leadId = generateEventId();
-      fbq('track', 'Lead', params, { eventID: leadId });
+      fbq('track', 'Lead', {}, { eventID: leadId });
       sendToCapi('Lead', leadId);
-    } else if (eventName === 'quiz_resposta' || eventName === 'quiz_completo') {
-      // Eventos de engajamento do quiz: enviados como custom event pro Pixel
-      // (só no navegador, sem espelho CAPI — não são eventos de conversão).
-      fbq('trackCustom', eventName, params);
     }
-    // case_view e cta_click ficam só no dataLayer: são sinais de engajamento
-    // pra uso futuro com GTM/GA, não eventos de conversão do Pixel.
+    // quiz_resposta, quiz_completo, case_view e cta_click NÃO vão pro Pixel:
+    // as respostas do quiz são condição de saúde (dado sensível pra Meta).
   }
 }
 

@@ -23,8 +23,6 @@
 const DEFAULT_PIXEL_ID = '1034926504222895';
 const REF_TTL_SECONDS = 60 * 60 * 24 * 90; // 90 dias, alinhado à janela de atribuição de clique da Meta
 
-const ATTRIBUTION_KEYS = ['fbclid', 'utm_source', 'utm_medium', 'utm_campaign', 'campaign_name', 'campaign_id', 'adset_name', 'adset_id', 'ad_name', 'ad_id', 'utm_term'];
-
 // Eventos offline aceitos no /offline-event -> nome do evento mandado pra Meta.
 const OFFLINE_EVENT_MAP = {
   AvaliacaoRealizada: 'Schedule',
@@ -75,17 +73,14 @@ async function sendToMeta(env, eventEntry) {
   return { status: metaRes.status, data: await metaRes.json() };
 }
 
-function buildCustomData(attribution) {
-  const customData = {};
-  if (attribution && typeof attribution === 'object') {
-    for (const key of ATTRIBUTION_KEYS) {
-      const value = attribution[key];
-      if (typeof value === 'string' && value.length > 0 && value.length <= 256) {
-        customData[key] = value;
-      }
-    }
+// Remove query string/hash (UTMs, nomes de campanha) da URL enviada à Meta.
+function stripQuery(url) {
+  try {
+    const u = new URL(url);
+    return u.origin + u.pathname;
+  } catch (e) {
+    return '';
   }
-  return customData;
 }
 
 // POST /event — evento do lado do navegador (PageView já é padrão via fbq();
@@ -99,7 +94,7 @@ async function handleEvent(request, env, headers) {
     return jsonResponse({ error: 'invalid_json' }, 400, headers);
   }
 
-  const { event_name, event_id, event_source_url, fbp, fbc, attribution, ref } = body || {};
+  const { event_name, event_id, event_source_url, fbp, fbc, ref } = body || {};
 
   if (!event_name || !event_id) {
     return jsonResponse({ error: 'missing_event_name_or_event_id' }, 400, headers);
@@ -115,17 +110,16 @@ async function handleEvent(request, env, headers) {
   if (fbp) userData.fbp = fbp;
   if (fbc) userData.fbc = fbc;
 
-  const customData = buildCustomData(attribution);
-
   const eventEntry = {
     event_name,
     event_time: Math.floor(Date.now() / 1000),
     event_id,
-    event_source_url: event_source_url || '',
+    event_source_url: stripQuery(event_source_url),
     action_source: 'website',
     user_data: userData,
   };
-  if (Object.keys(customData).length > 0) eventEntry.custom_data = customData;
+  // Sem custom_data: a Meta bloqueia o domínio se receber parâmetros que
+  // pareçam dados de saúde. Attribution fica só na mensagem do WhatsApp.
 
   if (ref && env.LEADS) {
     try {

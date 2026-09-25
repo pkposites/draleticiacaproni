@@ -37,6 +37,10 @@
   t.src=v;s=b.getElementsByTagName(e)[0];
   s.parentNode.insertBefore(t,s)}(window, document,'script',
   'https://connect.facebook.net/en_US/fbevents.js');
+  // Desliga a coleta automática (textos de botões/metadados da página): na
+  // LP há botões do quiz com queixas de saúde, que a Meta trata como dado
+  // sensível e bloqueia o domínio.
+  fbq('set', 'autoConfig', false, '1034926504222895');
   fbq('init', '1034926504222895');
   fbq('track', 'PageView');
 </script>
