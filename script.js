@@ -94,18 +94,52 @@ captureOrigemParams();
 ============================================================= */
 var CAPI_ENDPOINT = 'https://draleticiacapronicapi.robson-oc96.workers.dev';
 var LEAD_REF_KEY = 'lead_ref';
+// Valor fixo do lead (a Meta exige número + moeda; sem valor real, usa 1 BRL).
+var LEAD_VALUE = 1;
+var LEAD_CURRENCY = 'BRL';
+// Parâmetros de URL que podem ir para a Meta: nenhum deles carrega texto livre.
+var SAFE_URL_PARAMS = ['fbclid', 'utm_source', 'utm_medium', 'utm_id', 'campaign_id', 'adset_id', 'ad_id'];
 
+// ID persistente do visitante (vira external_id na Meta). Criado no <head>.
 function getOrCreateLeadRef() {
   try {
-    var ref = localStorage.getItem(LEAD_REF_KEY);
+    var ref = window.leadRef || localStorage.getItem(LEAD_REF_KEY);
     if (!ref) {
       ref = 'ref-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 10);
       localStorage.setItem(LEAD_REF_KEY, ref);
     }
     return ref;
   } catch (e) {
-    return '';
+    return window.leadRef || '';
   }
+}
+
+// URL da página sem querystring sensível (só os parâmetros de SAFE_URL_PARAMS).
+function cleanPageUrl() {
+  try {
+    var url = new URL(window.location.href);
+    var clean = new URL(url.origin + url.pathname);
+    SAFE_URL_PARAMS.forEach(function (k) {
+      var v = url.searchParams.get(k);
+      if (v) clean.searchParams.set(k, v);
+    });
+    return clean.toString();
+  } catch (e) {
+    return window.location.origin + window.location.pathname;
+  }
+}
+
+// fbc: cookie _fbc do pixel; sem ele, montado a partir do fbclid do anúncio
+// no formato fb.1.<hora do clique em ms>.<fbclid>.
+function getFbc() {
+  var cookie = getCookie('_fbc');
+  if (cookie) return cookie;
+  try {
+    var saved = JSON.parse(localStorage.getItem('lead_fbclid') || 'null');
+    if (saved && saved.v) return 'fb.1.' + (saved.ts || Date.now()) + '.' + saved.v;
+  } catch (e) {}
+  var fbclid = getOrigemParams().fbclid;
+  return fbclid ? 'fb.1.' + Date.now() + '.' + fbclid : '';
 }
 
 function getCookie(name) {
@@ -117,18 +151,22 @@ function generateEventId() {
   return 'evt-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 10);
 }
 
-function sendToCapi(metaEventName, eventId) {
+/* Envia ao worker só o necessário para a Meta reconhecer a pessoa:
+   fbp, fbc, external_id e, quando digitados, telefone e primeiro nome
+   (o worker aplica o hash SHA-256). Nada de quiz, campanha ou anúncio. */
+function sendToCapi(metaEventName, eventId, extra) {
   if (!CAPI_ENDPOINT) return; // worker ainda não configurado nesta LP
 
-  var payload = {
+  var ref = getOrCreateLeadRef();
+  var payload = Object.assign({
     event_name: metaEventName,
     event_id: eventId,
-    event_source_url: window.location.href,
+    event_source_url: cleanPageUrl(),
     fbp: getCookie('_fbp'),
-    fbc: getCookie('_fbc'),
-    attribution: getOrigemParams(),
-    ref: getOrCreateLeadRef()
-  };
+    fbc: getFbc(),
+    external_id: ref,
+    ref: ref
+  }, extra || {});
 
   fetch(CAPI_ENDPOINT.replace(/\/$/, '') + '/event', {
     method: 'POST',
@@ -141,41 +179,42 @@ function sendToCapi(metaEventName, eventId) {
 /* ============================================================
    TRACKING HELPERS
    - lead_qualificado: usuário leu a LP e confirmou interesse na caixinha
-     (libera o botão de WhatsApp) -> fbq trackCustom 'lead_qualificado'
+     (libera o botão de WhatsApp) -> fbq trackCustom 'lead_qualificado',
+     sem parâmetros
    - lead_contato: clique no botão de WhatsApp já liberado
-     -> fbq track 'Lead' (evento padrão do Meta Pixel)
+     -> fbq track 'Lead' com value 1 e currency BRL
    Ambos também são espelhados na Conversions API (server-side) com o
    mesmo event_id, para dedupe automático no Ads Manager.
-   - quiz_resposta / quiz_completo: engajamento com o quiz -> fbq
-     trackCustom (só navegador, sem CAPI — não são eventos de conversão)
-   - case_view / cta_click: ficam só no dataLayer, para uso futuro com
-     GTM/GA caso seja conectado; não têm efeito no Pixel hoje
+   - quiz_resposta / quiz_completo / case_view / cta_click: ficam só no
+     dataLayer, sem as respostas. NÃO vão para a Meta (dados de saúde).
 ============================================================= */
 function trackEvent(eventName, params) {
   params = params || {};
   window.dataLayer = window.dataLayer || [];
+  // dataLayer: só o nome do evento e parâmetros neutros (sem respostas do quiz).
   dataLayer.push(Object.assign({ event: eventName }, params));
 
   if (typeof gtag === 'function') {
     gtag('event', eventName, params);
   }
-  if (typeof fbq === 'function') {
-    if (eventName === 'lead_qualificado') {
-      var qualId = generateEventId();
-      fbq('trackCustom', 'lead_qualificado', params, { eventID: qualId });
-      sendToCapi('lead_qualificado', qualId);
-    } else if (eventName === 'lead_contato') {
-      var leadId = generateEventId();
-      fbq('track', 'Lead', params, { eventID: leadId });
-      sendToCapi('Lead', leadId);
-    } else if (eventName === 'quiz_resposta' || eventName === 'quiz_completo') {
-      // Eventos de engajamento do quiz: enviados como custom event pro Pixel
-      // (só no navegador, sem espelho CAPI — não são eventos de conversão).
-      fbq('trackCustom', eventName, params);
-    }
-    // case_view e cta_click ficam só no dataLayer: são sinais de engajamento
-    // pra uso futuro com GTM/GA, não eventos de conversão do Pixel.
+  if (typeof fbq !== 'function') return;
+
+  if (eventName === 'lead_qualificado') {
+    var qualId = generateEventId();
+    fbq('trackCustom', 'lead_qualificado', {}, { eventID: qualId });
+    sendToCapi('lead_qualificado', qualId);
+  } else if (eventName === 'lead_contato') {
+    var leadId = generateEventId();
+    fbq('track', 'Lead', { value: LEAD_VALUE, currency: LEAD_CURRENCY }, { eventID: leadId });
+    sendToCapi('Lead', leadId, {
+      value: LEAD_VALUE,
+      currency: LEAD_CURRENCY,
+      phone: (leadTelefoneInput && leadTelefoneInput.value.trim()) || '',
+      first_name: ((leadNomeInput && leadNomeInput.value.trim()) || '').split(/\s+/)[0] || ''
+    });
   }
+  // Quiz, cases e CTAs NÃO vão para a Meta: as respostas do quiz falam de
+  // saúde e a Meta bloqueia domínios que enviam esse tipo de dado.
 }
 
 function buildWhatsappUrl() {
@@ -264,7 +303,7 @@ function finishQuiz() {
     " · Tempo do quadro: " + (quizAnswers.tempo_queixa || "-") +
     " · Urgência: " + (quizAnswers.urgencia || "-");
 
-  trackEvent('quiz_completo', quizAnswers);
+  trackEvent('quiz_completo');
 
   document.getElementById('qualificacao').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
@@ -279,7 +318,7 @@ document.querySelectorAll('.quiz-option').forEach(function (btn) {
     siblings.forEach(function (s) { s.classList.remove('selected'); });
     btn.classList.add('selected');
 
-    trackEvent('quiz_resposta', { pergunta: field, resposta: value });
+    trackEvent('quiz_resposta');
 
     setTimeout(function () {
       if (currentQuizStep < totalQuizSteps) {
@@ -324,17 +363,7 @@ confirmCheckbox.addEventListener('change', function () {
     optionalFields.hidden = false;
 
     if (!hasFiredLeadQualificado) {
-      var origem = getOrigemParams();
-      trackEvent('lead_qualificado', Object.assign(
-        { origem: 'caixa_confirmacao_lp' },
-        origem,
-        {
-          campaign_name: origem.campaign_name || origem.utm_campaign || '',
-          adset_name: origem.adset_name || '',
-          ad_name: origem.ad_name || origem.utm_content || '',
-          fonte: resolveFonte(origem)
-        }
-      ));
+      trackEvent('lead_qualificado', { origem: 'caixa_confirmacao_lp' });
       hasFiredLeadQualificado = true;
     }
   } else {
@@ -376,7 +405,7 @@ whatsappQualificado.addEventListener('click', function (e) {
   // para não ser bloqueado como pop-up) e só troca a URL dela depois do
   // tracking, dando tempo do fetch do CAPI sair antes do WhatsApp assumir.
   var whatsappWindow = window.open('', '_blank');
-  trackEvent('lead_contato', Object.assign({ origem: 'botao_qualificado' }, getOrigemParams()));
+  trackEvent('lead_contato', { origem: 'botao_qualificado' });
 
   var leadNome = (leadNomeInput && leadNomeInput.value.trim()) || '';
   if (leadNome && window.LeadHub && typeof window.LeadHub.identify === 'function') {

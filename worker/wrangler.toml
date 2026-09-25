@@ -1,10 +1,10 @@
-name = "caproni-capi"
+name = "draleticiacapronicapi"
 main = "index.js"
 compatibility_date = "2026-01-01"
 
 [vars]
 PIXEL_ID = "1034926504222895"
-ALLOWED_ORIGIN = "https://dra-leticia-caproni.netlify.app"
+ALLOWED_ORIGIN = "https://draleticiacaproni.netlify.app,https://dra-leticia-caproni.netlify.app"
 
 # Segredos (não vão no git — configurar via `wrangler secret put` ou no dashboard):
 #   META_ACCESS_TOKEN     -> token de sistema do Business Manager (ads_management)

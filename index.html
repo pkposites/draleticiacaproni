@@ -13,9 +13,10 @@
   - Microsoft Clarity
   - Lead Hub (injeta código de rastreio na URL do WhatsApp; ver
     window.LeadHub.whatsappUrl() em script.js)
-  Eventos disparados neste site:
-    - "lead_qualificado" -> quando o usuário completa o mini-quiz de qualificação
-    - "lead_contato"      -> quando o usuário clica em qualquer botão de WhatsApp
+  Eventos enviados à Meta (pixel + API de Conversões, mesmo event_id):
+    - "lead_qualificado" -> ao marcar a caixinha de confirmação (sem parâmetros)
+    - "Lead"             -> ao clicar no WhatsApp liberado (value 1, BRL)
+  Nada do quiz, de campanha/anúncio ou de saúde vai para a Meta.
 ============================================================= -->
 
 <!-- Microsoft Clarity -->
@@ -27,7 +28,56 @@
     })(window, document, "clarity", "script", "yjrhuyxfsb");
 </script>
 
-<!-- Meta Pixel -->
+<!-- Privacidade dos dados enviados à Meta (roda ANTES do pixel)
+  - Guarda a origem completa do anúncio (UTMs, nomes de campanha/anúncio)
+    no navegador para o WhatsApp, o Lead Hub e o script.js.
+  - Tira da barra de endereço os parâmetros que carregam NOMES (campanha,
+    conjunto, anúncio, termo), que podem conter termos de saúde. Assim o
+    pixel e a API de Conversões nunca recebem esses textos. Ficam fbclid,
+    utm_source/medium e os IDs numéricos.
+  - Cria o ID persistente do visitante (external_id) e guarda o fbclid com a
+    hora do clique, para montar o fbc quando o cookie _fbc não existir.
+============================================================= -->
+<script>
+  (function () {
+    var NAMED = ['utm_campaign', 'utm_content', 'utm_term', 'campaign_name', 'adset_name', 'ad_name'];
+    var KEEP = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'utm_id',
+      'campaign_name', 'campaign_id', 'adset_name', 'adset_id', 'ad_name', 'ad_id',
+      'site_source_name', 'placement', 'fbclid', 'gclid'];
+    try {
+      var url = new URL(window.location.href);
+      window.lhLandingUrl = url.href; // Lead Hub lê a origem completa daqui
+      var found = {};
+      KEEP.forEach(function (k) { var v = url.searchParams.get(k); if (v) found[k] = v; });
+      if (Object.keys(found).length) {
+        try {
+          var saved = JSON.parse(sessionStorage.getItem('lead_origem_params') || '{}');
+          sessionStorage.setItem('lead_origem_params', JSON.stringify(Object.assign(saved, found)));
+        } catch (e) {}
+      }
+      if (found.fbclid) {
+        try { localStorage.setItem('lead_fbclid', JSON.stringify({ v: found.fbclid, ts: Date.now() })); } catch (e) {}
+      }
+      var changed = false;
+      NAMED.forEach(function (k) { if (url.searchParams.has(k)) { url.searchParams.delete(k); changed = true; } });
+      if (changed && window.history && history.replaceState) history.replaceState(history.state, '', url.pathname + url.search + url.hash);
+    } catch (e) {}
+    try {
+      var ref = localStorage.getItem('lead_ref');
+      if (!ref) {
+        ref = 'ref-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 10);
+        localStorage.setItem('lead_ref', ref);
+      }
+      window.leadRef = ref;
+    } catch (e) {}
+  })();
+</script>
+
+<!-- Meta Pixel
+  - autoConfig desligado: o pixel não coleta sozinho textos de botões nem
+    metadados da página (título/descrição), que falam de saúde.
+  - external_id (ID do visitante) vai no init; o pixel aplica o hash.
+============================================================= -->
 <script>
   !function(f,b,e,v,n,t,s)
   {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
@@ -37,7 +87,8 @@
   t.src=v;s=b.getElementsByTagName(e)[0];
   s.parentNode.insertBefore(t,s)}(window, document,'script',
   'https://connect.facebook.net/en_US/fbevents.js');
-  fbq('init', '1034926504222895');
+  fbq('set', 'autoConfig', false, '1034926504222895');
+  fbq('init', '1034926504222895', window.leadRef ? { external_id: window.leadRef } : {});
   fbq('track', 'PageView');
 </script>
 

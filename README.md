@@ -60,21 +60,24 @@ Ao terminar as 4 perguntas, a página rola sozinha até a seção de qualificaç
 
 ## Eventos de tracking disparados
 
-Todos os eventos passam por `trackEvent(nome, params)` em `script.js`, que:
-- Empurra para `dataLayer` (compatível com GTM/GA4)
-- Chama `gtag('event', ...)` quando disponível
-- Chama `fbq('track'/'trackCustom', ...)` para o Meta Pixel quando disponível
+Todos os eventos passam por `trackEvent(nome, params)` em `script.js`, que empurra para `dataLayer` e, só para os dois eventos de conversão, chama o Meta Pixel e a API de Conversões (worker) com o **mesmo `event_id`** (deduplicação).
 
-| Evento | Quando dispara | Observação |
+| Evento | Quando dispara | Vai para a Meta? |
 |---|---|---|
-| `quiz_resposta` | a cada pergunta respondida no quiz | `{ pergunta, resposta }` |
-| `quiz_completo` | ao finalizar as 4 perguntas do quiz | envia todas as respostas |
-| `case_view` | ao trocar de slide no carrossel de antes/depois | `{ indice }` |
-| `cta_click` | clique no CTA final ou na barra fixa mobile (que só rolam a página) | `{ origem }` |
-| **`lead_qualificado`** | ao marcar a caixinha de confirmação (1x por sessão) | mapeado para `fbq('trackCustom', 'lead_qualificado')` |
-| **`lead_contato`** | ao clicar no botão de WhatsApp já liberado | mapeado para `fbq('track', 'Lead')` — evento **padrão** do Meta Pixel |
+| `quiz_resposta` / `quiz_completo` | quiz | **Não** (só `dataLayer`, sem as respostas) |
+| `case_view` / `cta_click` | carrossel / CTAs | **Não** (só `dataLayer`) |
+| **`lead_qualificado`** | ao marcar a caixinha de confirmação (1x por sessão) | Sim: `fbq('trackCustom', 'lead_qualificado')` **sem parâmetros** + CAPI |
+| **`lead_contato`** | ao clicar no botão de WhatsApp já liberado | Sim: `fbq('track', 'Lead', { value: 1, currency: 'BRL' })` + CAPI |
 
-`lead_qualificado` e `lead_contato` são os dois eventos-chave pedidos pelo cliente para otimização de campanha.
+### Regras para não perder os dados na Meta (categoria saúde)
+
+A Meta classificou o domínio como relacionado a saúde. Por isso:
+
+- **Nada de texto livre para a Meta**: sem respostas do quiz, sem nome de campanha/conjunto/anúncio, sem `content_name`/`content_category`. Só `value` (número) e `currency` (`"BRL"`) no Lead.
+- **URL limpa antes do pixel**: um script no `<head>` guarda a origem completa (para o WhatsApp e o Lead Hub) e tira da barra de endereço `utm_campaign`, `utm_content`, `utm_term`, `campaign_name`, `adset_name` e `ad_name`. Ficam `fbclid`, `utm_source`, `utm_medium` e os IDs numéricos.
+- **`autoConfig` desligado** no pixel: ele não coleta sozinho textos de botões nem título/descrição da página.
+- **Correspondência**: `external_id` (ID persistente do visitante, `lead_ref`) no `init` do pixel e na CAPI; a CAPI também leva IP, navegador, `fbp`, `fbc` (cookie ou montado do `fbclid`) e, no Lead, telefone e primeiro nome (com hash SHA-256 no worker). O worker **recusa** (HTTP 422) qualquer evento sem pelo menos um identificador (`fbp`, `fbc`, `external_id`, `ph`, `em`).
+- A mensagem do WhatsApp continua com o perfil do quiz e a campanha: ela vai só para a equipe da clínica.
 
 ## O que falta configurar antes de ir ao ar
 
@@ -103,7 +106,8 @@ Worker em `worker/` (`index.js` + `wrangler.toml`), no mesmo padrão usado nos o
 2. Configurar variáveis/segredos do Worker:
    - `META_ACCESS_TOKEN` (secret) — token de sistema do Business Manager com permissão `ads_management`
    - `OFFLINE_EVENTS_TOKEN` (secret) — token à sua escolha, usado pra autenticar quem reporta eventos offline
-   - `PIXEL_ID` e `ALLOWED_ORIGIN` (vars) já vêm preenchidos no `wrangler.toml`, ajustar `ALLOWED_ORIGIN` se o domínio final for diferente de `dra-leticia-caproni.netlify.app`
+   - `PIXEL_ID` e `ALLOWED_ORIGIN` (vars) já vêm preenchidos no `wrangler.toml`. `ALLOWED_ORIGIN` aceita vários domínios separados por vírgula (hoje `draleticiacaproni.netlify.app` e `dra-leticia-caproni.netlify.app`)
+   - `GRAPH_VERSION` (var, opcional): versão da Graph API, padrão `v24.0`
    - Binding KV `LEADS` já apontado pro namespace `caproni-leads` (id `3fdac85e78554d72b1d234ffbf66ac64`), criado nesta conta Cloudflare
 3. Depois de publicado, copiar a URL do Worker (`https://caproni-capi.<subdomínio>.workers.dev`) e colar em `CAPI_ENDPOINT` no `script.js`.
 
