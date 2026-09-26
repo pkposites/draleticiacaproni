@@ -226,12 +226,11 @@ function buildWhatsappUrl() {
     + "de agendar uma avaliação inicial com a equipe da Clínica Exen.";
   if (telefone) msg += "\n\nMeu WhatsApp: " + telefone;
 
-  if (quizAnswers.queixa) {
+  if (quizAnswers.objetivo) {
     msg += "\n\nMeu perfil:";
-    msg += "\n- Queixa principal: " + quizAnswers.queixa;
-    if (quizAnswers.ja_fez_transplante) msg += "\n- Já fez transplante antes: " + quizAnswers.ja_fez_transplante;
-    if (quizAnswers.tempo_queixa) msg += "\n- Tempo do quadro: " + quizAnswers.tempo_queixa;
-    if (quizAnswers.urgencia) msg += "\n- Quando pretende iniciar: " + quizAnswers.urgencia;
+    msg += "\n- O que busca: " + quizAnswers.objetivo;
+    if (quizAnswers.tempo_desejo) msg += "\n- Há quanto tempo pensa nisso: " + quizAnswers.tempo_desejo;
+    if (quizAnswers.urgencia) msg += "\n- Quando pretende começar: " + quizAnswers.urgencia;
   }
 
   msg += buildOrigemMessageBlock(getOrigemParams());
@@ -270,7 +269,7 @@ if (casesTrack) {
 
 /* ============================================================
    QUIZ INTERATIVO
-   Coleta o perfil do caso (queixa, histórico, tempo, urgência) para
+   Coleta o perfil do lead (objetivo, tempo de consideração, urgência) para
    a equipe já receber o contato com contexto. As respostas entram
    na mensagem de WhatsApp montada em buildWhatsappUrl().
 ============================================================= */
@@ -298,10 +297,9 @@ function finishQuiz() {
   quizResult.hidden = false;
 
   quizResultSummary.textContent =
-    "Queixa: " + (quizAnswers.queixa || "-") +
-    " · Já fez transplante: " + (quizAnswers.ja_fez_transplante || "-") +
-    " · Tempo do quadro: " + (quizAnswers.tempo_queixa || "-") +
-    " · Urgência: " + (quizAnswers.urgencia || "-");
+    "O que busca: " + (quizAnswers.objetivo || "-") +
+    " · Há quanto tempo pensa nisso: " + (quizAnswers.tempo_desejo || "-") +
+    " · Quando quer começar: " + (quizAnswers.urgencia || "-");
 
   trackEvent('quiz_completo');
 

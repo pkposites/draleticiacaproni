@@ -646,11 +646,25 @@ p{line-height:1.7;color:var(--text-muted);margin:0 0 16px;}
 
 @media(max-width:600px){
   .lgpd-banner{
-    left:12px;right:12px;bottom:12px;
-    padding:16px 18px;
-    flex-direction:column;
-    align-items:stretch;
+    left:10px;right:10px;bottom:10px;
+    padding:12px 14px;
+    gap:10px;
+    flex-direction:row;
+    flex-wrap:nowrap;
+    align-items:center;
   }
-  .lgpd-banner-actions{width:100%;}
+  .lgpd-banner-text{
+    flex:1 1 auto;
+    font-size:11.5px;
+    line-height:1.35;
+  }
+  .lgpd-banner-actions{flex:0 0 auto;gap:8px;}
+  .lgpd-btn{flex:0 0 auto;padding:8px 14px;font-size:11px;white-space:nowrap;}
+}
+
+@media(max-width:360px){
+  .lgpd-banner{flex-wrap:wrap;}
+  .lgpd-banner-text{flex:1 1 100%;}
+  .lgpd-banner-actions{flex:1 1 100%;width:100%;}
   .lgpd-btn{flex:1;}
 }
