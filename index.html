@@ -289,7 +289,7 @@
       </div>
     </div>
 
-    <a href="https://www.instagram.com/dra.leticiacaproni/" target="_blank" rel="noopener" class="instagram-card">
+    <a href="https://www.instagram.com/dra.leticiacaproni/" target="_blank" rel="noopener" class="instagram-card" id="instagram-card-link">
       <span class="instagram-card-icon" aria-hidden="true">
         <svg width="26" height="26" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
           <rect x="2" y="2" width="20" height="20" rx="6" stroke="currentColor" stroke-width="1.6"/>
@@ -474,6 +474,13 @@
 <!-- Barra fixa de WhatsApp (somente mobile, via CSS) -->
 <div class="mobile-sticky-cta">
   <a href="#qualificacao" id="cta-sticky-scroll" class="btn btn-primary">Agendar Avaliação</a>
+</div>
+
+<!-- Aviso de "bem-vindo de volta": aparece se a pessoa saiu pra ver o
+     Instagram e retornou a esta aba, puxando de volta pro funil -->
+<div class="welcome-back-toast" id="welcome-back-toast" hidden role="status">
+  <p>Viu os resultados? Vamos continuar sua avaliação.</p>
+  <button type="button" id="welcome-back-cta" class="btn btn-primary welcome-back-btn">Continuar avaliação</button>
 </div>
 
 <script src="script.js"></script>

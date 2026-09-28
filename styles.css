@@ -644,6 +644,42 @@ p{line-height:1.7;color:var(--text-muted);margin:0 0 16px;}
   body:has(.mobile-sticky-cta:not(.is-hidden)) .site-footer{padding-bottom:88px;}
 }
 
+/* Aviso "bem-vindo de volta" (retorno do Instagram) */
+.welcome-back-toast{
+  position:fixed;
+  top:16px;left:16px;right:16px;
+  max-width:420px;
+  margin:0 auto;
+  z-index:90;
+  display:flex;
+  align-items:center;
+  gap:14px;
+  flex-wrap:wrap;
+  padding:16px 20px;
+  background:var(--green-900);
+  color:var(--cream);
+  border:1px solid rgba(201,169,106,.4);
+  border-radius:var(--radius-lg);
+  box-shadow:0 24px 48px -20px rgba(0,0,0,.55);
+  animation:welcome-back-in .35s ease;
+}
+.welcome-back-toast[hidden]{display:none;}
+.welcome-back-toast p{
+  flex:1 1 200px;
+  margin:0;
+  font-size:14px;
+  color:var(--cream);
+}
+.welcome-back-btn{padding:10px 18px;font-size:12px;flex:0 0 auto;}
+@keyframes welcome-back-in{
+  from{opacity:0;transform:translateY(-12px);}
+  to{opacity:1;transform:translateY(0);}
+}
+@media(max-width:480px){
+  .welcome-back-toast{flex-direction:column;align-items:stretch;text-align:center;}
+  .welcome-back-btn{width:100%;}
+}
+
 /* Banner de cookies (LGPD) */
 .lgpd-banner{
   position:fixed;

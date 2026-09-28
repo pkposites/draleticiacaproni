@@ -454,3 +454,44 @@ if (mobileStickyCta && 'IntersectionObserver' in window) {
   }, { threshold: 0 });
   stickyObserver.observe(qualifySection);
 }
+
+/* ============================================================
+   "BEM-VINDO DE VOLTA" — RETORNO DO INSTAGRAM
+   Quando a pessoa clica pra ver mais resultados no Instagram, o link
+   abre em nova aba/contexto (target="_blank"), então esta aba da LP
+   nunca fecha. Se ela ficar dispersa navegando lá e voltar pra cá
+   depois, mostramos um convite puxando de volta pro funil, em vez de
+   simplesmente perder esse engajamento.
+============================================================= */
+var instagramCardLink = document.getElementById('instagram-card-link');
+var welcomeBackToast = document.getElementById('welcome-back-toast');
+var welcomeBackCta = document.getElementById('welcome-back-cta');
+var wentToInstagram = false;
+
+if (instagramCardLink && welcomeBackToast) {
+  instagramCardLink.addEventListener('click', function () {
+    wentToInstagram = true;
+    trackEvent('cta_click', { origem: 'card_instagram' });
+  });
+
+  document.addEventListener('visibilitychange', function () {
+    if (document.visibilityState === 'visible' && wentToInstagram) {
+      wentToInstagram = false;
+      welcomeBackToast.hidden = false;
+      trackEvent('cta_click', { origem: 'retorno_instagram_toast' });
+
+      clearTimeout(welcomeBackToast._timer);
+      welcomeBackToast._timer = setTimeout(function () {
+        welcomeBackToast.hidden = true;
+      }, 8000);
+    }
+  });
+
+  if (welcomeBackCta) {
+    welcomeBackCta.addEventListener('click', function () {
+      welcomeBackToast.hidden = true;
+      clearTimeout(welcomeBackToast._timer);
+      document.getElementById('qualificacao').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  }
+}
