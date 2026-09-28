@@ -223,27 +223,55 @@ p{line-height:1.7;color:var(--text-muted);margin:0 0 16px;}
   border-radius:var(--radius-lg);
   box-shadow:0 24px 44px -26px rgba(0,0,0,.3);
 }
-.cases-arrow{
-  position:absolute;
-  top:50%;
-  transform:translateY(-50%);
-  width:40px;height:40px;
-  border-radius:50%;
-  border:1px solid var(--gold);
-  background:rgba(255,255,255,.9);
-  color:var(--green-900);
-  font-size:20px;
-  line-height:1;
-  cursor:pointer;
-  display:flex;align-items:center;justify-content:center;
-  transition:all .2s ease;
+.instagram-card{
+  display:flex;
+  align-items:center;
+  gap:16px;
+  max-width:520px;
+  margin:32px auto 0;
+  padding:18px 22px;
+  background:linear-gradient(135deg,var(--cream-dim),var(--cream));
+  border:1px solid rgba(201,169,106,.35);
+  border-radius:var(--radius-lg);
+  text-decoration:none;
+  box-shadow:0 20px 40px -28px rgba(0,0,0,.25);
+  transition:transform .2s ease, box-shadow .2s ease;
 }
-.cases-arrow:hover{background:var(--gold);}
-.cases-arrow-prev{left:-8px;}
-.cases-arrow-next{right:-8px;}
-.cases-dots{display:flex;justify-content:center;gap:8px;margin-top:24px;}
-.cases-dot{width:8px;height:8px;border-radius:50%;background:rgba(0,0,0,.15);cursor:pointer;transition:background .2s ease;}
-.cases-dot.active{background:var(--gold);}
+.instagram-card:hover{
+  transform:translateY(-2px);
+  box-shadow:0 24px 44px -22px rgba(201,169,106,.4);
+}
+.instagram-card-icon{
+  flex:0 0 auto;
+  width:44px;height:44px;
+  border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  background:var(--green-900);
+  color:var(--gold-light);
+}
+.instagram-card-text{
+  flex:1 1 auto;
+  display:flex;
+  flex-direction:column;
+  gap:2px;
+}
+.instagram-card-text strong{
+  font-family:var(--serif);
+  font-size:17px;
+  color:var(--text-dark);
+  font-weight:600;
+}
+.instagram-card-text span{
+  font-size:12.5px;
+  color:var(--text-muted);
+}
+.instagram-card-arrow{
+  flex:0 0 auto;
+  font-size:18px;
+  color:var(--gold);
+  transition:transform .2s ease;
+}
+.instagram-card:hover .instagram-card-arrow{transform:translateX(4px);}
 
 /* Depoimento em vídeo */
 .video-testimony{padding:96px 0;background:var(--cream-dim);}
@@ -575,9 +603,14 @@ p{line-height:1.7;color:var(--text-muted);margin:0 0 16px;}
 
   .cases{padding:56px 0;}
   .video-testimony{padding:56px 0;}
-  .cases-arrow{width:34px;height:34px;font-size:17px;}
-  .cases-arrow-prev{left:2px;}
-  .cases-arrow-next{right:2px;}
+  .instagram-card{
+    padding:16px 18px;
+    gap:12px;
+    margin-top:24px;
+  }
+  .instagram-card-icon{width:38px;height:38px;}
+  .instagram-card-text strong{font-size:15px;}
+  .instagram-card-arrow{display:none;}
 
   .final-cta-inner .btn-lg{width:100%;}
 
