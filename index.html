@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Dra. Letícia Caproni | Especialista em Beleza Capilar — Avalie seu Visual</title>
-<meta name="description" content="Conheça o método da Dra. Letícia Caproni e da Clínica Exen para recuperar volume e densidade dos fios com naturalidade. Agende uma avaliação inicial com nossa equipe.">
+<meta name="description" content="Conheça o método da Dra. Letícia Caproni e da Clínica Exen para redesenhar a linha frontal e dar mais volume e densidade aos fios. Agende uma avaliação inicial com nossa equipe.">
 <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
 
 <!-- ============================================================
@@ -16,7 +16,7 @@
   Eventos enviados à Meta (pixel + API de Conversões, mesmo event_id):
     - "lead_qualificado" -> ao marcar a caixinha de confirmação (sem parâmetros)
     - "Lead"             -> ao clicar no WhatsApp liberado (value 1, BRL)
-  Nada do quiz, de campanha/anúncio ou de saúde vai para a Meta.
+  Nada do quiz, de campanha/anúncio ou de dados sensíveis vai para a Meta.
 ============================================================= -->
 
 <!-- Microsoft Clarity — só carrega depois do consentimento (ver bloco LGPD) -->
@@ -34,7 +34,7 @@
   - Guarda a origem completa do anúncio (UTMs, nomes de campanha/anúncio)
     no navegador para o WhatsApp, o Lead Hub e o script.js.
   - Tira da barra de endereço os parâmetros que carregam NOMES (campanha,
-    conjunto, anúncio, termo), que podem conter termos de saúde. Assim o
+    conjunto, anúncio, termo), que podem conter dados sensíveis. Assim o
     pixel e a API de Conversões nunca recebem esses textos. Ficam fbclid,
     utm_source/medium e os IDs numéricos.
   - Cria o ID persistente do visitante (external_id) e guarda o fbclid com a
@@ -77,7 +77,7 @@
 
 <!-- Meta Pixel — só carrega depois do consentimento (ver bloco LGPD)
   - autoConfig desligado: o pixel não coleta sozinho textos de botões nem
-    metadados da página (título/descrição), que falam de saúde.
+    metadados da página (título/descrição), que podem conter dados sensíveis.
   - external_id (ID do visitante) vai no init; o pixel aplica o hash.
 ============================================================= -->
 <script>
@@ -187,8 +187,8 @@
   <div class="hero-texture"></div>
   <div class="container hero-inner">
     <div class="hero-copy">
-      <p class="eyebrow">Recuperação Capilar Avançada &middot; SP</p>
-      <h1>Recupere sua linha frontal com naturalidade e segurança</h1>
+      <p class="eyebrow">Design Capilar Avançado &middot; SP</p>
+      <h1>Redesenhe sua linha frontal com naturalidade e segurança</h1>
       <p class="hero-lead">
         Método exclusivo da Dra. Letícia Caproni para redesenhar sua linha
         de cabelo com naturalidade, com acompanhamento próximo do início
@@ -277,14 +277,14 @@
   <div class="container">
     <div class="section-heading center">
       <p class="eyebrow">Resultados Reais</p>
-      <h2>Antes e depois de quem já passou pelo método</h2>
+      <h2>Resultados reais com o método</h2>
       <p class="qualify-sub">Resultado real, 1 ano depois.</p>
     </div>
 
     <div class="cases-slider">
       <div class="cases-track" id="cases-track">
         <figure class="case-slide">
-          <img src="assets/cases/case-1.png" alt="Antes e depois - resultado real" loading="lazy">
+          <img src="assets/cases/case-1.png" alt="Resultado real com o método" loading="lazy">
         </figure>
       </div>
     </div>
@@ -306,7 +306,7 @@
   </div>
 </section>
 
-<!-- ===================== DEPOIMENTO EM VÍDEO ===================== -->
+<!-- ===================== DEPOIMENTO EM VÍDEO (temporariamente oculto) =====================
 <section class="video-testimony" id="video-depoimento">
   <div class="container video-testimony-inner">
     <div class="section-heading center">
@@ -325,6 +325,7 @@
     </div>
   </div>
 </section>
+============================================================= -->
 
 <!-- ===================== PROVA SOCIAL ===================== -->
 <section class="proof" id="depoimentos">
@@ -379,9 +380,9 @@
       <div class="quiz-step" data-step="1">
         <label>O que você quer melhorar hoje?</label>
         <div class="quiz-options">
-          <button type="button" class="quiz-option" data-field="objetivo" data-value="Linha da testa mais alta">Linha da testa mais alta</button>
-          <button type="button" class="quiz-option" data-field="objetivo" data-value="Menos volume no topo">Menos volume no topo</button>
-          <button type="button" class="quiz-option" data-field="objetivo" data-value="Sobrancelhas ralas">Sobrancelhas ralas</button>
+          <button type="button" class="quiz-option" data-field="objetivo" data-value="Desenhar a linha frontal">Desenhar a linha frontal</button>
+          <button type="button" class="quiz-option" data-field="objetivo" data-value="Mais volume no topo">Mais volume no topo</button>
+          <button type="button" class="quiz-option" data-field="objetivo" data-value="Sobrancelhas mais marcadas">Sobrancelhas mais marcadas</button>
           <button type="button" class="quiz-option" data-field="objetivo" data-value="Ainda não sei dizer">Ainda não sei dizer ao certo</button>
         </div>
       </div>

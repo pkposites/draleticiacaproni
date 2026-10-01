@@ -186,7 +186,7 @@ function sendToCapi(metaEventName, eventId, extra) {
    Ambos também são espelhados na Conversions API (server-side) com o
    mesmo event_id, para dedupe automático no Ads Manager.
    - quiz_resposta / quiz_completo / case_view / cta_click: ficam só no
-     dataLayer, sem as respostas. NÃO vão para a Meta (dados de saúde).
+     dataLayer, sem as respostas. NÃO vão para a Meta (dados sensíveis).
 ============================================================= */
 function trackEvent(eventName, params) {
   params = params || {};
@@ -213,8 +213,8 @@ function trackEvent(eventName, params) {
       first_name: ((leadNomeInput && leadNomeInput.value.trim()) || '').split(/\s+/)[0] || ''
     });
   }
-  // Quiz, cases e CTAs NÃO vão para a Meta: as respostas do quiz falam de
-  // saúde e a Meta bloqueia domínios que enviam esse tipo de dado.
+  // Quiz, cases e CTAs NÃO vão para a Meta: as respostas do quiz contêm
+  // dados sensíveis e a Meta bloqueia domínios que enviam esse tipo de dado.
 }
 
 function buildWhatsappUrl() {
