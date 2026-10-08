@@ -14,9 +14,9 @@
  *    event_source_url sem querystring, exceto fbclid/utm_source/utm_medium e
  *    IDs numéricos.
  *
- * Também recebe eventos offline (avaliação realizada, cirurgia agendada)
- * reportados manualmente, casando com o clique original via um código de
- * referência (ref) guardado no KV.
+ * Também recebe eventos offline (avaliação realizada, agendamento
+ * confirmado) reportados manualmente, casando com o clique original via um
+ * código de referência (ref) guardado no KV.
  *
  * Env vars (wrangler secret / vars):
  *   META_ACCESS_TOKEN     -> token de sistema com permissão ads_management (secret)
@@ -34,8 +34,8 @@ const DEFAULT_PIXEL_ID = '1034926504222895';
 const DEFAULT_GRAPH_VERSION = 'v24.0';
 const REF_TTL_SECONDS = 60 * 60 * 24 * 90; // 90 dias
 
-// Únicos eventos aceitos do navegador.
-const BROWSER_EVENTS = ['Lead', 'lead_qualificado'];
+// Único evento aceito do navegador.
+const BROWSER_EVENTS = ['Lead'];
 
 // Parâmetros de URL que podem ir para a Meta (nenhum carrega texto livre).
 const SAFE_URL_PARAMS = ['fbclid', 'utm_source', 'utm_medium', 'utm_id', 'campaign_id', 'adset_id', 'ad_id'];
@@ -46,7 +46,7 @@ const IDENTIFIER_KEYS = ['fbp', 'fbc', 'external_id', 'ph', 'em'];
 // Eventos offline aceitos no /offline-event -> nome do evento mandado pra Meta.
 const OFFLINE_EVENT_MAP = {
   AvaliacaoRealizada: 'Schedule',
-  CirurgiaAgendada: 'Purchase',
+  AgendamentoConfirmado: 'Purchase',
 };
 
 function allowedOrigins(env) {
@@ -171,7 +171,7 @@ function hasIdentifier(userData) {
   return IDENTIFIER_KEYS.some((k) => userData[k]);
 }
 
-// POST /event — lead_qualificado e Lead vindos do script.js da LP.
+// POST /event — Lead vindo do script.js da LP.
 async function handleEvent(request, env, headers) {
   let body;
   try {
@@ -232,7 +232,7 @@ async function handleEvent(request, env, headers) {
 }
 
 // POST /offline-event — reportado manualmente quando o lead vira
-// AvaliacaoRealizada / CirurgiaAgendada depois da conversa no WhatsApp.
+// AvaliacaoRealizada / AgendamentoConfirmado depois da conversa no WhatsApp.
 // Body: { ref, event_name, phone?, email?, value?, currency? }
 // Requer header X-Offline-Token igual a env.OFFLINE_EVENTS_TOKEN.
 async function handleOfflineEvent(request, env, headers) {
