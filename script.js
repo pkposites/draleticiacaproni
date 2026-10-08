@@ -87,7 +87,7 @@ captureOrigemParams();
 
 /* ============================================================
    CAPI (Conversions API) — envio server-side via Cloudflare Worker
-   Espelha lead_qualificado/lead_contato no servidor, com o mesmo
+   Espelha o lead_contato (Lead) no servidor, com o mesmo
    event_id do fbq() do navegador (dedupe automático no Ads Manager).
    Preencher CAPI_ENDPOINT com a URL do worker depois do deploy
    (ex: https://caproni-capi.<subdomínio>.workers.dev).
@@ -178,12 +178,9 @@ function sendToCapi(metaEventName, eventId, extra) {
 
 /* ============================================================
    TRACKING HELPERS
-   - lead_qualificado: usuário leu a LP e confirmou interesse na caixinha
-     (libera o botão de WhatsApp) -> fbq trackCustom 'lead_qualificado',
-     sem parâmetros
    - lead_contato: clique no botão de WhatsApp já liberado
      -> fbq track 'Lead' com value 1 e currency BRL
-   Ambos também são espelhados na Conversions API (server-side) com o
+   Também é espelhado na Conversions API (server-side) com o
    mesmo event_id, para dedupe automático no Ads Manager.
    - quiz_resposta / quiz_completo / case_view / cta_click: ficam só no
      dataLayer, sem as respostas. NÃO vão para a Meta (dados sensíveis).
@@ -199,11 +196,7 @@ function trackEvent(eventName, params) {
   }
   if (typeof fbq !== 'function') return;
 
-  if (eventName === 'lead_qualificado') {
-    var qualId = generateEventId();
-    fbq('trackCustom', 'lead_qualificado', {}, { eventID: qualId });
-    sendToCapi('lead_qualificado', qualId);
-  } else if (eventName === 'lead_contato') {
+  if (eventName === 'lead_contato') {
     var leadId = generateEventId();
     fbq('track', 'Lead', { value: LEAD_VALUE, currency: LEAD_CURRENCY }, { eventID: leadId });
     sendToCapi('Lead', leadId, {
@@ -322,7 +315,6 @@ var confirmHint = document.getElementById('confirm-hint');
 var optionalFields = document.getElementById('optional-fields');
 var leadNomeInput = document.getElementById('lead-nome');
 var leadTelefoneInput = document.getElementById('lead-telefone');
-var hasFiredLeadQualificado = false;
 
 confirmCheckbox.addEventListener('change', function () {
   if (confirmCheckbox.checked) {
@@ -330,11 +322,6 @@ confirmCheckbox.addEventListener('change', function () {
     whatsappQualificado.setAttribute('aria-disabled', 'false');
     confirmHint.classList.add('hidden');
     optionalFields.hidden = false;
-
-    if (!hasFiredLeadQualificado) {
-      trackEvent('lead_qualificado', { origem: 'caixa_confirmacao_lp' });
-      hasFiredLeadQualificado = true;
-    }
   } else {
     whatsappQualificado.classList.remove('unlocked');
     whatsappQualificado.setAttribute('aria-disabled', 'true');
