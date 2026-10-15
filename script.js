@@ -216,7 +216,7 @@ function buildWhatsappUrl() {
 
   var msg = nome ? "Olá! Meu nome é " + nome + "." : "Olá!";
   msg += " Vim através da página de Letícia Caproni e gostaria "
-    + "de agendar uma avaliação inicial com a equipe do Studio Exen.";
+    + "de agendar uma avaliação inicial com a equipe da Exen.";
   if (telefone) msg += "\n\nMeu WhatsApp: " + telefone;
 
   if (quizAnswers.objetivo) {
