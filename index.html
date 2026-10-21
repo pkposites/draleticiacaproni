@@ -8,17 +8,22 @@
 <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
 
 <!-- ============================================================
-  TRACKING SETUP
-  - Meta Pixel
-  - Microsoft Clarity
-  - Lead Hub (injeta código de rastreio na URL do WhatsApp; ver
-    window.LeadHub.whatsappUrl() em script.js)
-  Eventos enviados à Meta (pixel + API de Conversões, mesmo event_id):
-    - "Lead" -> ao clicar no WhatsApp liberado (value 1, BRL)
+  TRACKING SETUP — consentimento é a caixinha da seção "Vamos dar o
+  próximo passo?" (qualificação). Não há banner de cookies separado.
+  - Nada que identifique o visitante é gravado em localStorage/sessionStorage
+    antes da caixinha ser marcada (fica só em memória, em window.__leadPending).
+  - Meta Pixel carrega com fbq('consent','revoke') já no load: o PageView
+    fica retido pelo próprio pixel até fbq('consent','grant') (na marcação
+    da caixinha). external_id só é passado ao pixel depois do aceite.
+  - Microsoft Clarity só carrega quando a caixinha é marcada (loadClarity()).
+  - Cadê o Lead (tracker.js) carrega com data-consent="required": fica
+    inativo até window.LeadHub.consent(true), chamado na marcação da caixinha.
+  - API de Conversões (worker) só recebe o evento "Lead", disparado no
+    clique do WhatsApp já liberado — ou seja, sempre depois do aceite.
   Nada do quiz, de campanha/anúncio ou de dados sensíveis vai para a Meta.
 ============================================================= -->
 
-<!-- Microsoft Clarity — só carrega depois do consentimento (ver bloco LGPD) -->
+<!-- Microsoft Clarity — função só é chamada quando a caixinha é marcada -->
 <script type="text/javascript">
   function loadClarity() {
     (function(c,l,a,r,i,t,y){
@@ -29,15 +34,41 @@
   }
 </script>
 
-<!-- Privacidade dos dados enviados à Meta (roda ANTES do pixel)
-  - Guarda a origem completa do anúncio (UTMs, nomes de campanha/anúncio)
-    no navegador para o WhatsApp, o Lead Hub e o script.js.
+<!-- Estado de consentimento: nada é persistido em disco antes do aceite.
+  window.__leadPending guarda em memória o que seria gravado (origem do
+  anúncio, fbclid, ID do visitante); grantLeadConsent() só então grava. -->
+<script>
+  window.PIXEL_ID = '1034926504222895';
+  window.__leadConsent = false;
+  window.__leadPending = { origem: {}, fbclid: null, ref: null };
+  window.__clarityLoaded = false;
+
+  function grantLeadConsent() {
+    if (window.__leadConsent) return;
+    window.__leadConsent = true;
+    try {
+      if (Object.keys(window.__leadPending.origem).length) {
+        var saved = JSON.parse(sessionStorage.getItem('lead_origem_params') || '{}');
+        sessionStorage.setItem('lead_origem_params', JSON.stringify(Object.assign(saved, window.__leadPending.origem)));
+      }
+    } catch (e) {}
+    try {
+      if (window.__leadPending.fbclid) {
+        localStorage.setItem('lead_fbclid', JSON.stringify(window.__leadPending.fbclid));
+      }
+    } catch (e) {}
+    try {
+      var ref = window.__leadPending.ref || window.leadRef;
+      if (ref) localStorage.setItem('lead_ref', ref);
+    } catch (e) {}
+  }
+</script>
+
+<!-- Captura a origem do anúncio (UTMs/fbclid) e o ID do visitante só em
+  memória (window.__leadPending) até a caixinha ser marcada.
   - Tira da barra de endereço os parâmetros que carregam NOMES (campanha,
-    conjunto, anúncio, termo), que podem conter dados sensíveis. Assim o
-    pixel e a API de Conversões nunca recebem esses textos. Ficam fbclid,
-    utm_source/medium e os IDs numéricos.
-  - Cria o ID persistente do visitante (external_id) e guarda o fbclid com a
-    hora do clique, para montar o fbc quando o cookie _fbc não existir.
+    conjunto, anúncio, termo), que podem conter dados sensíveis — isso roda
+    sempre, não grava nada e não identifica ninguém.
 ============================================================= -->
 <script>
   (function () {
@@ -47,38 +78,34 @@
       'site_source_name', 'placement', 'fbclid', 'gclid'];
     try {
       var url = new URL(window.location.href);
-      window.lhLandingUrl = url.href; // Lead Hub lê a origem completa daqui
+      window.lhLandingUrl = url.href; // Cadê o Lead lê a origem completa daqui
       var found = {};
       KEEP.forEach(function (k) { var v = url.searchParams.get(k); if (v) found[k] = v; });
       if (Object.keys(found).length) {
-        try {
-          var saved = JSON.parse(sessionStorage.getItem('lead_origem_params') || '{}');
-          sessionStorage.setItem('lead_origem_params', JSON.stringify(Object.assign(saved, found)));
-        } catch (e) {}
+        Object.assign(window.__leadPending.origem, found);
       }
       if (found.fbclid) {
-        try { localStorage.setItem('lead_fbclid', JSON.stringify({ v: found.fbclid, ts: Date.now() })); } catch (e) {}
+        window.__leadPending.fbclid = { v: found.fbclid, ts: Date.now() };
       }
       var changed = false;
       NAMED.forEach(function (k) { if (url.searchParams.has(k)) { url.searchParams.delete(k); changed = true; } });
       if (changed && window.history && history.replaceState) history.replaceState(history.state, '', url.pathname + url.search + url.hash);
     } catch (e) {}
     try {
-      var ref = localStorage.getItem('lead_ref');
+      var ref = localStorage.getItem('lead_ref'); // de um aceite anterior, se houver
       if (!ref) {
         ref = 'ref-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 10);
-        localStorage.setItem('lead_ref', ref);
+        window.__leadPending.ref = ref;
       }
       window.leadRef = ref;
     } catch (e) {}
   })();
 </script>
 
-<!-- Meta Pixel — só carrega depois do consentimento (ver bloco LGPD)
-  - autoConfig desligado: o pixel não coleta sozinho textos de botões nem
-    metadados da página (título/descrição), que podem conter dados sensíveis.
-  - external_id (ID do visitante) vai no init; o pixel aplica o hash.
-============================================================= -->
+<!-- Meta Pixel — carrega no load da página, mas com consentimento revogado:
+  o próprio pixel retém o PageView até fbq('consent','grant') (marcação da
+  caixinha). autoConfig desligado: não coleta sozinho textos de botões nem
+  metadados da página. external_id só entra depois do aceite. -->
 <script>
   function loadMetaPixel() {
     !function(f,b,e,v,n,t,s)
@@ -89,68 +116,17 @@
     t.src=v;s=b.getElementsByTagName(e)[0];
     s.parentNode.insertBefore(t,s)}(window, document,'script',
     'https://connect.facebook.net/en_US/fbevents.js');
-    fbq('set', 'autoConfig', false, '1034926504222895');
-    fbq('init', '1034926504222895', window.leadRef ? { external_id: window.leadRef } : {});
+    fbq('consent', 'revoke');
+    fbq('set', 'autoConfig', false, window.PIXEL_ID);
+    fbq('init', window.PIXEL_ID, {});
     fbq('track', 'PageView');
   }
+  loadMetaPixel();
 </script>
 
-<!-- Lead Hub — só carrega depois do consentimento (ver bloco LGPD) -->
-<script>
-  function loadLeadHub() {
-    var s = document.createElement('script');
-    s.src = 'https://leadinghub.netlify.app/tracker.js';
-    s.setAttribute('data-key', 'pk_040d040dee18447c83babc304f32e461');
-    s.async = true;
-    document.head.appendChild(s);
-  }
-</script>
-
-<!-- ============================================================
-  CONSENTIMENTO DE COOKIES (LGPD)
-  Pixel, Clarity e Lead Hub só são carregados depois que a pessoa clica
-  em "Aceitar" no banner. Em "Recusar", nenhum deles carrega e a LP
-  segue funcionando normalmente (WhatsApp, quiz etc. não dependem disso).
-  A escolha fica salva em localStorage.lgpd_consent.
-============================================================= -->
-<script>
-  (function () {
-    var KEY = 'lgpd_consent';
-    var consent = '';
-    try { consent = localStorage.getItem(KEY) || ''; } catch (e) {}
-
-    function activateTracking() {
-      try { loadClarity(); } catch (e) {}
-      try { loadMetaPixel(); } catch (e) {}
-      try { loadLeadHub(); } catch (e) {}
-    }
-
-    if (consent === 'accepted') {
-      activateTracking();
-      return;
-    }
-    if (consent === 'rejected') return;
-
-    document.addEventListener('DOMContentLoaded', function () {
-      var banner = document.getElementById('lgpd-banner');
-      if (!banner) return;
-      banner.hidden = false;
-
-      var accept = document.getElementById('lgpd-accept');
-      var reject = document.getElementById('lgpd-reject');
-
-      accept.addEventListener('click', function () {
-        try { localStorage.setItem(KEY, 'accepted'); } catch (e) {}
-        banner.hidden = true;
-        activateTracking();
-      });
-      reject.addEventListener('click', function () {
-        try { localStorage.setItem(KEY, 'rejected'); } catch (e) {}
-        banner.hidden = true;
-      });
-    });
-  })();
-</script>
+<!-- Cadê o Lead — carrega no load, mas fica inativo (data-consent="required")
+  até window.LeadHub.consent(true) na marcação da caixinha de confirmação. -->
+<script src="https://leadinghub.netlify.app/tracker.js" data-key="pk_040d040dee18447c83babc304f32e461" data-consent="required" async></script>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -158,17 +134,6 @@
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-
-<!-- ===================== BANNER DE COOKIES (LGPD) ===================== -->
-<div class="lgpd-banner" id="lgpd-banner" hidden role="dialog" aria-label="Aviso de cookies">
-  <div class="lgpd-banner-text">
-    Usamos cookies para entender sua navegação e medir a origem dos contatos vindos de anúncios. <a href="privacidade.html" class="lgpd-banner-link">Saiba mais</a>.
-  </div>
-  <div class="lgpd-banner-actions">
-    <button type="button" id="lgpd-reject" class="btn btn-outline lgpd-btn">Recusar</button>
-    <button type="button" id="lgpd-accept" class="btn btn-primary lgpd-btn">Aceitar</button>
-  </div>
-</div>
 
 <!-- ===================== HEADER ===================== -->
 <header class="site-header">
@@ -424,7 +389,11 @@
         <span class="confirm-text">
           Entendi o método de Letícia Caproni e tenho interesse em
           falar com a equipe para uma avaliação inicial e conhecer as
-          soluções da Exen para o meu caso.
+          soluções da Exen para o meu caso. Autorizo o uso de cookies e
+          dos meus dados de navegação e de contato pela equipe e pela
+          Meta (Facebook/Instagram), para identificar meu atendimento e
+          medir os anúncios.
+          <a href="https://cadeolead.com.br/privacidade/pk_040d040dee18447c83babc304f32e461" target="_blank" rel="noopener" class="confirm-privacy-link" id="confirm-privacy-link">Política de privacidade</a>
         </span>
       </label>
 
@@ -437,7 +406,7 @@
       <button type="button" id="whatsapp-qualificado" class="btn btn-primary btn-block btn-locked" aria-disabled="true">
         Falar com a equipe no WhatsApp
       </button>
-      <p class="confirm-hint" id="confirm-hint">Marque a caixa acima para liberar o contato direto com a equipe.</p>
+      <p class="confirm-hint" id="confirm-hint">Marque a caixa acima para liberar o contato direto com a equipe. Sem marcar, nenhum dado seu é guardado.</p>
     </div>
   </div>
 </section>

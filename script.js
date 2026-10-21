@@ -45,10 +45,16 @@ function captureOrigemParams() {
   });
 
   if (Object.keys(found).length > 0) {
-    try {
-      var existing = JSON.parse(sessionStorage.getItem(ORIGEM_STORAGE_KEY) || '{}');
-      sessionStorage.setItem(ORIGEM_STORAGE_KEY, JSON.stringify(Object.assign(existing, found)));
-    } catch (e) { /* sessionStorage indisponível: segue só com o objeto em memória */ }
+    if (window.__leadConsent) {
+      try {
+        var existing = JSON.parse(sessionStorage.getItem(ORIGEM_STORAGE_KEY) || '{}');
+        sessionStorage.setItem(ORIGEM_STORAGE_KEY, JSON.stringify(Object.assign(existing, found)));
+      } catch (e) { /* sessionStorage indisponível: segue só com o objeto em memória */ }
+    } else if (window.__leadPending) {
+      // Antes do aceite (caixinha de confirmação), nada identificável é
+      // gravado em disco: fica só em memória até grantLeadConsent() rodar.
+      Object.assign(window.__leadPending.origem, found);
+    }
   }
 
   return found;
@@ -60,8 +66,9 @@ function getOrigemParams() {
   try {
     stored = JSON.parse(sessionStorage.getItem(ORIGEM_STORAGE_KEY) || '{}');
   } catch (e) { /* sessionStorage indisponível */ }
+  var pending = (window.__leadPending && window.__leadPending.origem) || {};
 
-  return Object.assign({}, stored, fromUrl);
+  return Object.assign({}, stored, pending, fromUrl);
 }
 
 function buildOrigemMessageBlock(origem) {
@@ -106,8 +113,9 @@ function getOrCreateLeadRef() {
     var ref = window.leadRef || localStorage.getItem(LEAD_REF_KEY);
     if (!ref) {
       ref = 'ref-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 10);
-      localStorage.setItem(LEAD_REF_KEY, ref);
+      window.leadRef = ref;
     }
+    if (window.__leadConsent) localStorage.setItem(LEAD_REF_KEY, ref);
     return ref;
   } catch (e) {
     return window.leadRef || '';
@@ -315,6 +323,15 @@ var confirmHint = document.getElementById('confirm-hint');
 var optionalFields = document.getElementById('optional-fields');
 var leadNomeInput = document.getElementById('lead-nome');
 var leadTelefoneInput = document.getElementById('lead-telefone');
+var confirmPrivacyLink = document.getElementById('confirm-privacy-link');
+
+// O link de política de privacidade fica dentro do <label> da caixinha;
+// sem isso, clicar nele também marcaria/desmarcaria o checkbox.
+if (confirmPrivacyLink) {
+  confirmPrivacyLink.addEventListener('click', function (e) {
+    e.stopPropagation();
+  });
+}
 
 confirmCheckbox.addEventListener('change', function () {
   if (confirmCheckbox.checked) {
@@ -322,11 +339,30 @@ confirmCheckbox.addEventListener('change', function () {
     whatsappQualificado.setAttribute('aria-disabled', 'false');
     confirmHint.classList.add('hidden');
     optionalFields.hidden = false;
+
+    // Consentimento EXPLÍCITO (LGPD): nada identificável roda antes daqui.
+    if (window.LeadHub && typeof window.LeadHub.consent === 'function') {
+      window.LeadHub.consent(true);
+    }
+    if (typeof fbq === 'function') fbq('consent', 'grant');
+    if (typeof grantLeadConsent === 'function') grantLeadConsent();
+    if (typeof fbq === 'function' && window.PIXEL_ID) {
+      fbq('init', window.PIXEL_ID, { external_id: window.leadRef });
+    }
+    if (!window.__clarityLoaded) {
+      window.__clarityLoaded = true;
+      try { loadClarity(); } catch (e) {}
+    }
   } else {
     whatsappQualificado.classList.remove('unlocked');
     whatsappQualificado.setAttribute('aria-disabled', 'true');
     confirmHint.classList.remove('hidden');
     optionalFields.hidden = true;
+
+    if (window.LeadHub && typeof window.LeadHub.consent === 'function') {
+      window.LeadHub.consent(false);
+    }
+    if (typeof fbq === 'function') fbq('consent', 'revoke');
   }
 });
 
@@ -364,8 +400,12 @@ whatsappQualificado.addEventListener('click', function (e) {
   trackEvent('lead_contato', { origem: 'botao_qualificado' });
 
   var leadNome = (leadNomeInput && leadNomeInput.value.trim()) || '';
-  if (leadNome && window.LeadHub && typeof window.LeadHub.identify === 'function') {
-    window.LeadHub.identify({ name: leadNome });
+  var leadTelefone = (leadTelefoneInput && leadTelefoneInput.value.trim()) || '';
+  if ((leadNome || leadTelefone) && window.LeadHub && typeof window.LeadHub.identify === 'function') {
+    var identifyPayload = {};
+    if (leadNome) identifyPayload.name = leadNome;
+    if (leadTelefone) identifyPayload.phone = leadTelefone;
+    window.LeadHub.identify(identifyPayload);
   }
 
   setTimeout(function () {
