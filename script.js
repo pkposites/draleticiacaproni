@@ -422,22 +422,17 @@ whatsappQualificado.addEventListener('click', function (e) {
 });
 
 /* ============================================================
-   DEMAIS CTAs (header, CTA final e barra fixa mobile)
+   DEMAIS CTAs (CTA final e barra fixa mobile)
    Estes NÃO abrem o WhatsApp diretamente — levam até a caixinha de
    confirmação com o mesmo destaque (chacoalhão + cor) do botão
    bloqueado, já deixando claro o que falta pra liberar o contato.
    O único caminho até o WhatsApp é o botão liberado pela caixinha.
+   O botão do header leva pro método (âncora simples, sem atrito) —
+   só os CTAs depois de algum conteúdo "empurram" pra qualificação.
 ============================================================= */
 function goToConfirmBox(e, origem) {
   if (e) e.preventDefault();
   callAttentionToCheckbox(origem);
-}
-
-var ctaHeaderScroll = document.querySelector('.header-cta');
-if (ctaHeaderScroll) {
-  ctaHeaderScroll.addEventListener('click', function (e) {
-    goToConfirmBox(e, 'cta_header');
-  });
 }
 
 var ctaFinalScroll = document.getElementById('cta-final-scroll');
