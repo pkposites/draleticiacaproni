@@ -440,10 +440,10 @@ if (ctaHeaderScroll) {
   });
 }
 
-var ctaHeroScroll = document.getElementById('cta-hero-scroll');
-if (ctaHeroScroll) {
-  ctaHeroScroll.addEventListener('click', function (e) {
-    goToConfirmBox(e, 'cta_hero');
+var ctaAboutScroll = document.getElementById('cta-about-scroll');
+if (ctaAboutScroll) {
+  ctaAboutScroll.addEventListener('click', function (e) {
+    goToConfirmBox(e, 'cta_about');
   });
 }
 
