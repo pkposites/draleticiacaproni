@@ -422,32 +422,11 @@ whatsappQualificado.addEventListener('click', function (e) {
 });
 
 /* ============================================================
-   DEMAIS CTAs (CTA final e barra fixa mobile)
-   Estes NÃO abrem o WhatsApp diretamente — levam até a caixinha de
-   confirmação com o mesmo destaque (chacoalhão + cor) do botão
-   bloqueado, já deixando claro o que falta pra liberar o contato.
-   O único caminho até o WhatsApp é o botão liberado pela caixinha.
-   O botão do header leva pro método (âncora simples, sem atrito) —
-   só os CTAs depois de algum conteúdo "empurram" pra qualificação.
+   Nenhum CTA da página pula direto pra caixinha de confirmação —
+   todos (header, hero, CTA final, barra fixa mobile) levam pra
+   conteúdo (Sobre/Método/Quiz). O único caminho até a caixinha
+   (e dali até o WhatsApp) é rolar a página ou completar o quiz.
 ============================================================= */
-function goToConfirmBox(e, origem) {
-  if (e) e.preventDefault();
-  callAttentionToCheckbox(origem);
-}
-
-var ctaFinalScroll = document.getElementById('cta-final-scroll');
-if (ctaFinalScroll) {
-  ctaFinalScroll.addEventListener('click', function (e) {
-    goToConfirmBox(e, 'cta_final');
-  });
-}
-
-var ctaStickyScroll = document.getElementById('cta-sticky-scroll');
-if (ctaStickyScroll) {
-  ctaStickyScroll.addEventListener('click', function (e) {
-    goToConfirmBox(e, 'barra_fixa_mobile');
-  });
-}
 
 /* ============================================================
    BARRA FIXA MOBILE: esconder perto do rodapé
